@@ -9,7 +9,7 @@ import javax.ws.rs.Produces;
 public class UserServiceRs {
 	@Inject
 	private UserService service;
-	
+
 	@GET
 	@Path("/nbUsers")
 	@Produces({ "application/json" })
