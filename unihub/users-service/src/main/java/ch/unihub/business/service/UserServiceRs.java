@@ -16,4 +16,11 @@ public class UserServiceRs {
 	public String getNbUsers() {
 		return "{\"nbUsers\":\"" + service.getNbUsers() + "\"}";
 		}
+	
+	@GET
+	@Path("/helloWorld")
+	@Produces({ "text/plain" })
+	public String helloWorld() {
+		return "Hello World";
+		}
 }

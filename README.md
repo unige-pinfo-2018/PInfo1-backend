@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/jeremie-martin/pinfotest.svg?branch=master)](https://travis-ci.org/jeremie-martin/pinfotest.svg?branch=master)
+[![Build Status](https://api.travis-ci.org/unige-pinfo-2018/PInfo1-dev.svg?branch=master)](https://api.travis-ci.org/unige-pinfo-2018/PInfo1-dev.svg?branch=master)
 
 # unihub-dev
 
