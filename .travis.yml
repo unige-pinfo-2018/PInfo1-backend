@@ -1,0 +1,2 @@
+language: java
+install: "cd unihub && mvn clean install"
