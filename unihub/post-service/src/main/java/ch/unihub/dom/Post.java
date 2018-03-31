@@ -1,6 +1,7 @@
 package ch.unihub.dom;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,19 +26,16 @@ public class Post implements Serializable {
 	
 	/** The creater of the post */
 	@NotNull
-	@Size(min = 2, max = 35)
 	@Column(name = "USERID")
 	private Long userId;
 	
 	/** The parenting post */
 	@NotNull
-	@Size(min = 2, max = 35)
 	@Column(name = "PARENTID")
 	private Long parentId;
 
 	/** The creater of the post */
 	@NotNull
-	@Size(min = 2, max = 35)
 	@Column(name = "REPLYTOID")
 	private Long replyToId;
 	
@@ -48,7 +46,25 @@ public class Post implements Serializable {
 	@Column(name = "CONTENT")
 	private String content;
 	
-		
+	
+	public Post() 
+	{
+		/**Integer y = 1;
+		long x = y.longValue();
+		this.id =x;
+		this.userId = x;
+		this.parentId = x;
+		this.replyToId = x;
+		this.content = "text";*/
+	}
+	
+	public Post(Long userId, Long parentId, Long replyToId, String content) 
+	{
+		this.userId = userId;
+		this.parentId = parentId;
+		this.replyToId = replyToId;
+		this.content = content;
+	}
 
 	public final Long getId() {
 		return id;
