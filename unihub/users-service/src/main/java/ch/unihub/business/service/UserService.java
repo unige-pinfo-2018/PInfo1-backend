@@ -10,5 +10,6 @@ import ch.unihub.dom.User;
 @Local
 public interface UserService extends Serializable {
 	List<User> getAll();
+	
 	int getNbUsers();
 }

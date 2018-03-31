@@ -23,4 +23,5 @@ public class UserServiceRs {
 	public String helloWorld() {
 		return "Hello World";
 		}
+
 }

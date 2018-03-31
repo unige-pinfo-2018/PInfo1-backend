@@ -36,4 +36,5 @@ public class UserServiceImpl implements UserService {
 	public int getNbUsers() {
 		return getAll().size();
 	}
+	
 }
