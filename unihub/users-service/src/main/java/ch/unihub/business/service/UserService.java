@@ -1,15 +1,13 @@
 package ch.unihub.business.service;
 
+import ch.unihub.dom.User;
+
+import javax.ejb.Local;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
-
-import javax.ejb.Local;
-import javax.persistence.NoResultException;
-import javax.validation.constraints.NotNull;
-
-import ch.unihub.dom.User;
 
 @Local
 public interface UserService extends Serializable {

@@ -1,7 +1,6 @@
 package ch.unihub.business.service;
 
-import java.util.List;
-import java.util.Optional;
+import ch.unihub.dom.User;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -10,8 +9,8 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.NotFoundException;
-
-import ch.unihub.dom.User;
+import java.util.List;
+import java.util.Optional;
 
 @Stateless
 public class UserServiceImpl implements UserService {
