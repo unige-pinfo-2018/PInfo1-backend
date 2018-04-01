@@ -35,6 +35,23 @@ public class User implements Serializable {
 	@Column(name = "PASSWD")
 	private String password;
 
+	@NotNull
+	@Column(name = "EMAIL")
+	private String email;
+
+	/**
+	 * Updates this fields with the given {@code User} object.
+	 * @param user A user object to copy the fields from.
+	 */
+	public void copyFields(final User user) {
+		if (user.getUsername() != null)
+			this.setUsername(user.getUsername());
+		if (user.getPassword() != null)
+			this.setPassword(user.getPassword());
+		if (user.getEmail() != null)
+			this.setEmail(user.getEmail());
+	}
+
 	public final Long getId() {
 		return id;
 	}
@@ -57,5 +74,13 @@ public class User implements Serializable {
 
 	public final void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 }
