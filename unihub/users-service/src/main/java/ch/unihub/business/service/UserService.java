@@ -1,9 +1,12 @@
 package ch.unihub.business.service;
 
 import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
 
 import javax.ejb.Local;
+import javax.persistence.NoResultException;
 import javax.validation.constraints.NotNull;
 
 import ch.unihub.dom.User;
@@ -18,21 +21,21 @@ public interface UserService extends Serializable {
 
     /**
      * @param username The username of the user to return.
-     * @return The {@code User} corresponding to the given username.
+     * @return The {@code User} corresponding to the given username, or an empty optional.
      */
-	User getUser(final String username);
+	Optional<User> getUser(final String username);
 
     /**
      * @param id The user's id.
-     * @return The {@code User} corresponding to the given id.
+     * @return The {@code User} corresponding to the given id, or an empty optional.
      */
-	User getUser(final Long id);
+	Optional<User> getUser(final Long id);
 
     /**
      * Adds a user to the database.
      * @param user A {@code User} object.
      */
-	void addUser(@NotNull final User user);
+	void addUser(@NotNull final User user) throws URISyntaxException;
 
     /**
      * Deletes a user from the database, using its id.
@@ -47,10 +50,13 @@ public interface UserService extends Serializable {
 	void deleteUser(final String username);
 
     /**
-     * Updates a user in the database, using its id to find it.
-     * @param updatedUser An updated {@code User} object.
+     * Updates a user in the database, using its id to find it. The update can only contain a part of the fields of
+     * the {@code User} object, for instance only the username. In that case, the other null fields will keep their
+     * initial values.
+     *
+     * @param updatedUser An updated {@code User} object, or an empty optional if the user wasn't found.
      */
-	void updateUser(final User updatedUser);
+	Optional<User> updateUser(final User updatedUser);
 
     /**
      * @return The total number of users in the database.

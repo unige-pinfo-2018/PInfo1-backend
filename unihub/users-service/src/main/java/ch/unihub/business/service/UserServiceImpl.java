@@ -1,16 +1,15 @@
 package ch.unihub.business.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.NotFoundException;
 
 import ch.unihub.dom.User;
 
@@ -24,38 +23,40 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public List<User> getAll() {
-		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
-		CriteriaQuery<User> c = qb.createQuery(User.class);
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<User> c = cb.createQuery(User.class);
 
 		Root<User> variableRoot = c.from(User.class);
 		c.select(variableRoot);
-		c.orderBy(qb.asc(variableRoot.get("id")));
+		c.orderBy(cb.asc(variableRoot.get("id")));
 		TypedQuery<User> query = entityManager.createQuery(c);
 		return query.getResultList();
 	}
 
 	@Override
-	public User getUser(String username) {
-		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
-		CriteriaQuery<User> cq = qb.createQuery(User.class);
+	public Optional<User> getUser(String username) {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<User> cq = cb.createQuery(User.class);
 
 		Root<User> root = cq.from(User.class);
-		Predicate usernameCond = qb.equal(root.get("username"), username);
+		Predicate usernameCond = cb.equal(root.get("username"), username);
 		cq.where(usernameCond);
 		TypedQuery<User> query = entityManager.createQuery(cq);
-		return query.getSingleResult();
+		List<User> results = query.getResultList();
+		return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
 	}
 
 	@Override
-	public User getUser(Long id) {
-		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
-		CriteriaQuery<User> cq = qb.createQuery(User.class);
+	public Optional<User> getUser(Long id) {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<User> cq = cb.createQuery(User.class);
 
 		Root<User> root = cq.from(User.class);
-		Predicate idCond = qb.equal(root.get("id"), id);
+		Predicate idCond = cb.equal(root.get("id"), id);
 		cq.where(idCond);
 		TypedQuery<User> query = entityManager.createQuery(cq);
-		return query.getSingleResult();
+		List<User> results = query.getResultList();
+		return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
 	}
 
 	@Override
@@ -66,17 +67,32 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void deleteUser(Long id) {
-		// TODO
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaDelete<User> delete = cb.createCriteriaDelete(User.class);
+
+		Root<User> root = delete.from(User.class);
+		delete.where(cb.equal(root.get("id"), id));
+		if (entityManager.createQuery(delete).executeUpdate() < 1)
+			throw new NotFoundException("No user with id " + id.toString() + " found in database");
 	}
 
 	@Override
 	public void deleteUser(String username) {
-		// TODO
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaDelete<User> delete = cb.createCriteriaDelete(User.class);
+
+		Root<User> root = delete.from(User.class);
+		delete.where(cb.equal(root.get("username"), username));
+		if (entityManager.createQuery(delete).executeUpdate() < 1)
+			throw new NotFoundException("No user with username \"" + username + "\" found in database");
 	}
 
 	@Override
-	public void updateUser(User updatedUser) {
-		// TODO
+	public Optional<User> updateUser(User updatedUser) {
+		Optional<User> user = getUser(updatedUser.getId());
+		if (!user.isPresent()) return Optional.empty();
+		user.get().copyFields(updatedUser);
+		return user;
 	}
 
 	@Override
