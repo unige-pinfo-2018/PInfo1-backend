@@ -2,5 +2,5 @@ This service is for post and reply
 
 basic things to do first :
 - make a post
-- get information about a post
+- (done) get informations about a post with id
 

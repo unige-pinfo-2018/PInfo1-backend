@@ -18,6 +18,7 @@ http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
 		<realm-name>unihub-realm</realm-name>
 	</login-config>
 
+	
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Rest Facade</web-resource-name>

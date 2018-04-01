@@ -49,13 +49,13 @@ public class Post implements Serializable {
 	
 	public Post() 
 	{
-		/**Integer y = 1;
+		Integer y = 1;
 		long x = y.longValue();
-		this.id =x;
+		
 		this.userId = x;
 		this.parentId = x;
 		this.replyToId = x;
-		this.content = "text";*/
+		this.content = "text";
 	}
 	
 	public Post(Long userId, Long parentId, Long replyToId, String content) 
