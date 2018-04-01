@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+
 @Path("/users")
 public class UserServiceRs {
 	@Inject
