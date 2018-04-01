@@ -34,6 +34,8 @@ public class User implements Serializable {
 	@Size(min = 2, max = 35)
 	@Column(name = "PASSWD")
 	private String password;
+	
+		
 
 	public final Long getId() {
 		return id;

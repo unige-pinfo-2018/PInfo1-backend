@@ -3,7 +3,7 @@
 	xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
 http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
-	<display-name>UniHub-User-Service-RS</display-name>
+	<display-name>UniHub-Post-Service-RS</display-name>
 
 	<servlet>
 		<servlet-name>javax.ws.rs.core.Application</servlet-name>
@@ -17,8 +17,8 @@ http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
 		<!--  <auth-method>BASIC</auth-method>-->
 		<realm-name>unihub-realm</realm-name>
 	</login-config>
-	
 
+	
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Rest Facade</web-resource-name>
@@ -28,6 +28,5 @@ http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
 			<http-method>PUT</http-method>
 			<http-method>DELETE</http-method>
 		</web-resource-collection>
-
 	</security-constraint>
 </web-app>
