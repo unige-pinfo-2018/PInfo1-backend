@@ -46,7 +46,7 @@ public class Post implements Serializable {
 	@Column(name = "CONTENT")
 	private String content;
 	
-	
+	/*
 	public Post() 
 	{
 		Integer y = 1;
@@ -64,6 +64,21 @@ public class Post implements Serializable {
 		this.parentId = parentId;
 		this.replyToId = replyToId;
 		this.content = content;
+	}*/
+
+
+	public void copyFields(final Post post) {
+		if (post.getUserId() != null)
+			this.setUserId(post.getUserId());
+
+		if (post.getParentId() != null)
+			this.setParentId(post.getParentId());
+
+		if (post.getReplyToId() != null)
+			this.setReplyToId(post.getReplyToId());
+
+		if (post.getContent() != null)
+			this.setContent(post.getContent());
 	}
 
 	public final Long getId() {

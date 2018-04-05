@@ -11,6 +11,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.NotFoundException;
+import java.util.List;
+import java.util.Optional;
 
 
 
@@ -42,7 +45,7 @@ public class PostServiceImpl implements PostService {
 	}
 	
 	@Override
-	public Post getPost(Long id) 
+	public Optional<Post> getPost(Long id)
 	{
 		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Post> cq = qb.createQuery(Post.class);
@@ -50,17 +53,19 @@ public class PostServiceImpl implements PostService {
 		Root<Post> root = cq.from(Post.class);
 		Predicate idCond = qb.equal(root.get("id"), id);
 		cq.where(idCond);
+
 		TypedQuery<Post> query = entityManager.createQuery(cq);
-		return query.getSingleResult();
+        List<Post> results = query.getResultList();
+        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+		//return query.getSingleResult();
 	}
-	
+
 	@Override
 	public void addPost(@NotNull Post newPost) {
 		newPost.setId(null);
-		newPost.setId(getNextPostId());
+		//newPost.setId(getNextPostId());
 		entityManager.persist(newPost);
 	}
-	
 	
 	public Long getNextPostId() {
 		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
@@ -79,4 +84,12 @@ public class PostServiceImpl implements PostService {
 		}
 		
 	}
+
+    @Override
+    public Optional<Post> updatePost(Post updatedPost) {
+        Optional<Post> post = getPost(updatedPost.getId());
+        if (!post.isPresent()) return Optional.empty();
+        post.get().copyFields(updatedPost);
+        return post;
+    }
 }
