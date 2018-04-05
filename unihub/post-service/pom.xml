@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>ch.ranters.unihub</groupId>
-	<artifactId>unihub</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>unihub</artifactId>
+		<groupId>ch.ranters.unihub</groupId>
+		<version>0.0.2-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+    <artifactId>post-service</artifactId>
+	<packaging>war</packaging>
 	<dependencies>
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
 			<version>7.0</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.ejb</groupId>
-			<artifactId>javax.ejb-api</artifactId>
-			<version>3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -87,10 +86,8 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
-
 	<build>
-		<finalName>unihub</finalName>
+		<finalName>post-service</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -100,41 +97,12 @@
 					<ejbVersion>3.2</ejbVersion>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>3.2.0</version>
-				<configuration>
-					<outputDirectory>/opt/docker-deploy</outputDirectory>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.0.0</version>
-				<inherited>false</inherited>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>/opt/docker-deploy</directory>
-							<includes>
-								<include>*</include>
-							</includes>
-						</fileset>
-					</filesets>
-				</configuration>
-
-			</plugin>
 		</plugins>
 	</build>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<failOnMissingWebXml>false</failOnMissingWebXml>
+		<failOnMissingWebXml>true</failOnMissingWebXml>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	<modules>
-		<module>users-service</module>
-		<module>search-service</module>
-    <module>post-service</module>
-  </modules>
 </project>
