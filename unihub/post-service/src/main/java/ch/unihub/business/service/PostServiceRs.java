@@ -2,7 +2,6 @@ package ch.unihub.business.service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import javax.validation.constraints.NotNull;
@@ -17,9 +16,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
 import java.util.Optional;
 
-
 import ch.unihub.dom.Post;
-
 
 @Path("/posts")
 public class PostServiceRs {
@@ -49,20 +46,31 @@ public class PostServiceRs {
     public Response getPost(@PathParam("id") Long id) {
         return postResponse(service.getPost(id));
     }
-    /*
-	public Response getPost(@PathParam("id") Long id) 
-	{
-		Post post;
-		try {
-			post = service.getPost(id);
-		} catch (NoResultException e) {
-			return Response.status(Response.Status.NOT_FOUND).build();
-		}
-		return Response.ok().entity(post).build();
-	}*/
+
+
+    @GET
+    @Path("/userId_by_id/{id}")
+    @Produces({ "application/json" })
+    public Long getUserIdPost(@PathParam("id") Long id) {
+        return service.getUserIdPost(id);
+    }
+
+	@GET
+	@Path("/parentId_by_id/{id}")
+	@Produces({ "application/json" })
+	public Long getParentIdPost(@PathParam("id") Long id) {
+		return service.getParentIdPost(id);
+	}
+
+	@GET
+	@Path("/replyToId_by_id/{id}")
+	@Produces({ "application/json" })
+	public Long getReplyToIdPost(@PathParam("id") Long id) {
+		return service.getReplyToIdPost(id);
+	}
 
 	@PUT
-	@Path("/add")
+	@Path("/addPost")
 	@Produces({ "application/json" })
 	public Response addPost(@NotNull Post post) throws URISyntaxException {
 		service.addPost(post);
@@ -88,5 +96,4 @@ public class PostServiceRs {
                 Response.ok(updatedPostOptional.get()).build() :
                 Response.status(Response.Status.NOT_FOUND).build();
     }
-
 }

@@ -2,7 +2,6 @@ package ch.unihub.dom;
 
 import java.io.Serializable;
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -38,34 +37,12 @@ public class Post implements Serializable {
 	@NotNull
 	@Column(name = "REPLYTOID")
 	private Long replyToId;
-	
-	
+
 	/** The user content */
 	@NotNull
 	@Size(min = 0, max = 400)
 	@Column(name = "CONTENT")
 	private String content;
-	
-	/*
-	public Post() 
-	{
-		Integer y = 1;
-		long x = y.longValue();
-		
-		this.userId = x;
-		this.parentId = x;
-		this.replyToId = x;
-		this.content = "text";
-	}
-	
-	public Post(Long userId, Long parentId, Long replyToId, String content) 
-	{
-		this.userId = userId;
-		this.parentId = parentId;
-		this.replyToId = replyToId;
-		this.content = content;
-	}*/
-
 
 	public void copyFields(final Post post) {
 		if (post.getUserId() != null)

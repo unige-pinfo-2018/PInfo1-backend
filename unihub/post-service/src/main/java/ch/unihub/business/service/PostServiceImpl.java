@@ -63,7 +63,6 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public void addPost(@NotNull Post newPost) {
 		newPost.setId(null);
-		//newPost.setId(getNextPostId());
 		entityManager.persist(newPost);
 	}
 	
@@ -80,9 +79,55 @@ public class PostServiceImpl implements PostService {
 		if (nb == null) {
 			return firstId;
 		} else {
-			return nb + 1;	
+			return nb + 1;
 		}
-		
+	}
+
+
+	@Override
+	public Long getUserIdPost(Long id)
+	{
+
+        CriteriaBuilder qb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Post> cq = qb.createQuery(Post.class);
+
+        Root<Post> root = cq.from(Post.class);
+        Predicate idCond = qb.equal(root.get("id"), id);
+        cq.where(idCond);
+
+        TypedQuery<Post> query = entityManager.createQuery(cq);
+        List<Post> results = query.getResultList();
+		return results.isEmpty() ? 0 : results.get(0).getUserId();
+    }
+
+	@Override
+	public Long getParentIdPost(Long id)
+	{
+		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Post> cq = qb.createQuery(Post.class);
+
+		Root<Post> root = cq.from(Post.class);
+		Predicate idCond = qb.equal(root.get("id"), id);
+		cq.where(idCond);
+
+		TypedQuery<Post> query = entityManager.createQuery(cq);
+		List<Post> results = query.getResultList();
+		return results.isEmpty() ? 0 : results.get(0).getParentId();
+	}
+
+	@Override
+	public Long getReplyToIdPost(Long id)
+	{
+		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Post> cq = qb.createQuery(Post.class);
+
+		Root<Post> root = cq.from(Post.class);
+		Predicate idCond = qb.equal(root.get("id"), id);
+		cq.where(idCond);
+
+		TypedQuery<Post> query = entityManager.createQuery(cq);
+		List<Post> results = query.getResultList();
+		return results.isEmpty() ? 0 : results.get(0).getReplyToId();
 	}
 
     @Override

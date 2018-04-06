@@ -20,7 +20,16 @@ public interface PostService extends Serializable {
 
 	//get a post with the id
 	Optional<Post> getPost(final Long id);
-	
+
+	//get a userId of post with the id
+	Long getUserIdPost(final Long id);
+
+	//get a ParentId of post with the id
+	Long getParentIdPost(final Long id);
+
+	//get a ReplyToId of post with the id
+	Long getReplyToIdPost(final Long id);
+
 	//add post 
 	void addPost(@NotNull final Post post);
 

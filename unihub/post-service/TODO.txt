@@ -1,0 +1,30 @@
+-methods get informations 
+	Long getParentId(Id) 				[Done]
+	Long getReplyToId(Id)				[Done]
+	Long getNbUpvote(Id)
+	String getTag(Id)
+	List<Post id> getAllChildrenPost(Post)
+	List<Post id> getALLReplyToPost(Post)
+	List<Post id> getLatestPost(number,?critere?)
+
+-methods put informations
+	addLike(id)
+	addDislike(id)
+	addTag(id) 
+
+//not in table POSTS but it's linked so..
+-creat table 						[Done]
+	like						[Done]
+		id
+		postId
+		userId
+	dislike						[Done]
+		id
+		postId
+		userId
+	Tag						[Done]
+		id
+		postId
+	
+
+-creat unity test
