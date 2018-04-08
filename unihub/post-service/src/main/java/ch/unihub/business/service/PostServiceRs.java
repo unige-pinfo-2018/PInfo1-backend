@@ -69,6 +69,13 @@ public class PostServiceRs {
 		return service.getReplyToIdPost(id);
 	}
 
+	@GET
+	@Path("/nbUpvotes_by_id/{idPost}")
+	@Produces({ "application/json" })
+	public Long getNbUpvotes(@PathParam("idPost") Long idPost) {
+		return service.getNbUpvotes(idPost);
+	}
+
 	@PUT
 	@Path("/addPost")
 	@Produces({ "application/json" })

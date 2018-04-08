@@ -13,7 +13,7 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "LIKES")
-public class Like implements Serializable {
+public class Like implements Serializable  {
 
     private static final long serialVersionUID = -6146935825517747043L;
 
@@ -32,7 +32,6 @@ public class Like implements Serializable {
     @NotNull
     @Column(name = "POSTID")
     private Long postId;
-
 
     public final Long getId() {
         return id;
@@ -57,5 +56,8 @@ public class Like implements Serializable {
     public final void setPostId(Long postId) {
         this.postId = postId;
     }
+
+
+
 
 }

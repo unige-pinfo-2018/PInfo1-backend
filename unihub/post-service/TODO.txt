@@ -1,16 +1,23 @@
 -methods get informations 
 	Long getParentId(Id) 				[Done]
 	Long getReplyToId(Id)				[Done]
-	Long getNbUpvote(Id)
-	String getTag(Id)
-	List<Post id> getAllChildrenPost(Post)
-	List<Post id> getALLReplyToPost(Post)
-	List<Post id> getLatestPost(number,?critere?)
+	Long getNbUpvote(Id)				[Done]
+	String getTag(Id)				
+	List<Post id> getAllChildrenPost(Post)		
+	List<Post id> getALLReplyToPost(Post)		
+	List<Post id> getLatestPost(number,?critere?)	
 
 -methods put informations
-	addLike(id)
-	addDislike(id)
-	addTag(id) 
+	addLike()					[Done]
+	addDislike()					[Done]
+	addTag() 					[Done]
+
+-method e to delete 
+	like
+	dislike
+	post
+	tag
+
 
 //not in table POSTS but it's linked so..
 -creat table 						[Done]
@@ -26,5 +33,10 @@
 		id
 		postId
 	
+-add column date in posts table
 
 -creat unity test
+
+
+
+Like and Dislike could be childs of UserActionToPost

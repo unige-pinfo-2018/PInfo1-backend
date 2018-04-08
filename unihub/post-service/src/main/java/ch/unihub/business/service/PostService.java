@@ -7,7 +7,10 @@ import javax.validation.constraints.NotNull;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
+import ch.unihub.dom.Dislike;
+import ch.unihub.dom.Like;
 import ch.unihub.dom.Post;
+import ch.unihub.dom.Tag;
 
 @Local
 public interface PostService extends Serializable {
@@ -21,6 +24,15 @@ public interface PostService extends Serializable {
 	//get a post with the id
 	Optional<Post> getPost(final Long id);
 
+    //get a like with the id
+    Optional<Like> getLike(final Long id);
+
+    //get a dislike with the id
+    Optional<Dislike> getDislike(final Long id);
+
+    //get a dislike with the id
+    Optional<Tag> getTag(final Long id);
+
 	//get a userId of post with the id
 	Long getUserIdPost(final Long id);
 
@@ -30,8 +42,20 @@ public interface PostService extends Serializable {
 	//get a ReplyToId of post with the id
 	Long getReplyToIdPost(final Long id);
 
+    //get a ReplyToId of post with the id
+    Long getNbUpvotes(final Long idPost);
+
 	//add post 
 	void addPost(@NotNull final Post post);
+
+    //add like
+    void addLike(@NotNull final Like like);
+
+    //add dislike
+    void addDislike(@NotNull final Dislike dislike);
+
+    //add tag
+    void addTag(@NotNull final Tag tag);
 
 	//get the next id
 	public Long getNextPostId();

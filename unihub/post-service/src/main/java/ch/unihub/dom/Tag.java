@@ -28,6 +28,11 @@ public class Tag implements Serializable {
     @Column(name = "POSTID")
     private Long postId;
 
+    /** The tag */
+    @NotNull
+    @Size(min = 2, max = 60)
+    @Column(name = "NAME")
+    private String name;
 
     public final Long getId() {
         return id;
@@ -43,6 +48,14 @@ public class Tag implements Serializable {
 
     public final void setPostId(Long postId) {
         this.postId = postId;
+    }
+
+    public final String getName() {
+        return name;
+    }
+
+    public final void setName(String name) {
+        this.name = name;
     }
 
 }
