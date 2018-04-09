@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ch.ranters.unihub</groupId>
 	<artifactId>unihub</artifactId>
@@ -46,7 +47,15 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.10</version>
+			<version>4.12</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.jboss.shrinkwrap.resolver</groupId>
+			<artifactId>shrinkwrap-resolver-depchain</artifactId>
+			<version>2.2.6</version>
+			<scope>test</scope>
+			<type>pom</type>
 		</dependency>
 
 		<dependency>
@@ -86,6 +95,7 @@
 			<version>0.7.4.201502262128</version>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 
@@ -135,6 +145,6 @@
 	<modules>
 		<module>users-service</module>
 		<module>search-service</module>
-    <module>post-service</module>
-  </modules>
+		<module>post-service</module>
+	</modules>
 </project>
