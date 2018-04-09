@@ -28,12 +28,14 @@ public class User implements Serializable {
 	@Size(min = 2, max = 35)
 	@Column(name = "PASSWD")
 	private String password;
-	
-		
 
 	@NotNull
 	@Column(name = "EMAIL")
 	private String email;
+
+	@Column(name = "ROLE")
+	@Enumerated(EnumType.STRING)
+	private Role role;
 
 	/**
 	 * Updates this fields with the given {@code User} object.
@@ -46,6 +48,8 @@ public class User implements Serializable {
 			this.setPassword(user.getPassword());
 		if (user.getEmail() != null)
 			this.setEmail(user.getEmail());
+		if (user.getRole() != null)
+			this.setRole(user.getRole());
 	}
 
 	public final Long getId() {
@@ -78,5 +82,13 @@ public class User implements Serializable {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
 	}
 }
