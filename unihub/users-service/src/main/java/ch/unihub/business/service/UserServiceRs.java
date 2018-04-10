@@ -108,7 +108,6 @@ public class UserServiceRs {
 		} catch  ( UnknownAccountException uae ) {
 			logger.error("Unknown account");
 		} catch  ( IncorrectCredentialsException ice ) {
-			logger.error(ice.getMessage());
 			logger.error("Incorrect username/password combination");
 		} catch  ( LockedAccountException lae ) {
 			logger.error("Account is locked. Impossible to authenticate.");
@@ -121,7 +120,6 @@ public class UserServiceRs {
 
 		// If connection was not successful, sends a Unauthorized response
 		if (!successfulAuth) return Response.status(401).build();
-		logger.info("User authenticated");
 		return Response.ok(currentUser.getSession()).build();
 	}
 
@@ -144,6 +142,7 @@ public class UserServiceRs {
 	private Response userResponse(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<User> userOptional) {
 		if (userOptional.isPresent()) {
 			final User user = userOptional.get();
+			user.setPassword("*****");
 			return Response.ok().entity(user).build();
 		} else return Response.status(Response.Status.NOT_FOUND).build();
 	}

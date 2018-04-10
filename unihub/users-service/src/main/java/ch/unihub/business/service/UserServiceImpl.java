@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
 	public void addUser(@NotNull User user) {
 		// Id will be created automatically
 		user.setId(null);
-    final String plainPassword = user.getPassword();
+    	final String plainPassword = user.getPassword();
 		user.setPassword(passwordService.encryptPassword(plainPassword));
 		entityManager.persist(user);
 	}
