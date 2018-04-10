@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -130,12 +128,11 @@ public class UserServiceRs {
 	@Produces("application/json")
 	@Consumes("application/json")
 	public Response addUser(@NotNull final User user) throws URISyntaxException {
-		final String password = user.getPassword();
 		// Checks if the username is already taken
 		if (service.getUser(user.getUsername()).isPresent())
 			return Response.status(Response.Status.CONFLICT).build();
 		// If user doesn't exist, add it to the database
-		service.addUser(user, password);
+		service.addUser(user);
 		return Response
 				.status(Response.Status.CREATED)
 				.contentLocation(new URI("users/by_id/" + user.getId().toString()))

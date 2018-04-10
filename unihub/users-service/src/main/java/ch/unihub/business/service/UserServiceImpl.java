@@ -70,10 +70,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void addUser(@NotNull User user, @NotNull String password) {
+	public void addUser(@NotNull User user) {
 		// Id will be created automatically
 		user.setId(null);
-		user.setPassword(passwordService.encryptPassword(password));
+    final String plainPassword = user.getPassword();
+		user.setPassword(passwordService.encryptPassword(plainPassword));
 		entityManager.persist(user);
 	}
 

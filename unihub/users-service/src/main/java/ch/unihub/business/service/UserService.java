@@ -36,7 +36,7 @@ public interface UserService extends Serializable {
      * Adds a user to the database.
      * @param user A {@code User} object.
      */
-	void addUser(@NotNull final User user, @NotNull final String password) throws URISyntaxException;
+	void addUser(@NotNull final User user) throws URISyntaxException;
 
     /**
      * Deletes a user from the database, using its id.

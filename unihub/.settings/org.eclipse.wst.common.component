@@ -6,8 +6,8 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/users-service/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/users-service/src/main/resources"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/search-service/src/main/resources"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/users-service/src/test"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/search-service/src/test"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/users-service/src/test/java"/>
         <property name="context-root" value="unihub"/>
         <property name="java-output-path" value="/unihub/target/classes"/>
     </wb-module>
