@@ -6,16 +6,17 @@ import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.annotation.ManagedBean;
 import javax.faces.bean.RequestScoped;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 /**
  * @author Arthur Deschamps
  */
@@ -32,7 +33,10 @@ public class AuthServiceRs {
     @Path("/login")
     @Produces("application/json")
     @Consumes("application/json")
-    public Response login(@NotNull final String username, @NotNull final String password) {
+    public Response login(@NotNull final String usernameAndPassword) {
+        JsonObject usernameAndPasswordArray = Json.createReader(new StringReader(usernameAndPassword)).readObject();
+        final String username = usernameAndPasswordArray.getString("username");
+        final String password = usernameAndPasswordArray.getString("password");
         UsernamePasswordToken token = new UsernamePasswordToken(username, password);
         token.setRememberMe(true);
 
@@ -46,9 +50,9 @@ public class AuthServiceRs {
             currentUser.login(token);
             successfulAuth = true;
         } catch  ( UnknownAccountException uae ) {
-            logger.info(uae.getMessage());
             logger.error("Unknown account");
         } catch  ( IncorrectCredentialsException ice ) {
+            logger.error(ice.getMessage());
             logger.error("Incorrect username/password combination");
         } catch  ( LockedAccountException lae ) {
             logger.error("Account is locked. Impossible to authenticate.");

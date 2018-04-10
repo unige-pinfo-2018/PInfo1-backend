@@ -28,7 +28,9 @@ public class User implements Serializable {
 
 	// Still required to be able to send the password in a JSON from the client.
 	// Not saved in db.
-	@Transient
+	@NotNull
+	@Size(min = 2, max = 1000)
+	@Column(name = "PASSWD")
 	private String password;
 
 	@NotNull
@@ -86,5 +88,9 @@ public class User implements Serializable {
 
 	public String getPassword() {
 		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 }
