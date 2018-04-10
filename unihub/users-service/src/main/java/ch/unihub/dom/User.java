@@ -5,6 +5,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 
+/**
+ * @author Arthur Deschamps
+ */
 @Entity
 @Table(name = "USERS")
 public class User implements Serializable {
@@ -23,10 +26,9 @@ public class User implements Serializable {
 	@Column(name = "USERNAME")
 	private String username;
 
-	/** The user password */
-	@NotNull
-	@Size(min = 2, max = 35)
-	@Column(name = "PASSWD")
+	// Still required to be able to send the password in a JSON from the client.
+	// Not saved in db.
+	@Transient
 	private String password;
 
 	@NotNull
@@ -44,8 +46,6 @@ public class User implements Serializable {
 	public void copyFields(final User user) {
 		if (user.getUsername() != null)
 			this.setUsername(user.getUsername());
-		if (user.getPassword() != null)
-			this.setPassword(user.getPassword());
 		if (user.getEmail() != null)
 			this.setEmail(user.getEmail());
 		if (user.getRole() != null)
@@ -68,14 +68,6 @@ public class User implements Serializable {
 		this.username = username;
 	}
 
-	public final String getPassword() {
-		return password;
-	}
-
-	public final void setPassword(String password) {
-		this.password = password;
-	}
-
 	public String getEmail() {
 		return email;
 	}
@@ -90,5 +82,9 @@ public class User implements Serializable {
 
 	public void setRole(Role role) {
 		this.role = role;
+	}
+
+	public String getPassword() {
+		return password;
 	}
 }

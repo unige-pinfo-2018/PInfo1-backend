@@ -1,8 +1,15 @@
 package ch.unihub.business.service;
 
+import ch.unihub.dom.Hash;
 import ch.unihub.dom.User;
+import org.apache.shiro.crypto.RandomNumberGenerator;
+import org.apache.shiro.crypto.SecureRandomNumberGenerator;
+import org.apache.shiro.crypto.hash.Sha256Hash;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -12,10 +19,18 @@ import javax.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @author Arthur Deschamps
+ */
 @Stateless
 public class UserServiceImpl implements UserService {
 	// The serial-id
 	private static final long serialVersionUID = 1386508985359072399L;
+	// Number of hash iterations to apply to the password
+	private static final int HASH_ITERATIONS = 500000;
+
+	private RandomNumberGenerator rng = new SecureRandomNumberGenerator();
+	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -59,9 +74,27 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void addUser(@NotNull User user) {
+	public void addUser(@NotNull User user, @NotNull String password) {
+		// Id will be created automatically
 		user.setId(null);
+		// Computes the salt
+		Object salt = rng.nextBytes();
+		// Computes the hash
+		Sha256Hash hash = new Sha256Hash(password, salt, HASH_ITERATIONS);
+		final String hashStr = hash.toBase64();
+		final String saltStr = hash.getSalt().toBase64();
+		final Hash hashObj = new Hash();
+		hashObj.setHash(hashStr);
+		hashObj.setSalt(saltStr);
+		hashObj.setUser(user);
+		// Lets J2EE generate the id
+		hashObj.setId(null);
+
+		logger.info(hashObj.getSalt());
+		logger.info(hashObj.getHash());
+		// Saves both object in database
 		entityManager.persist(user);
+		entityManager.persist(hashObj);
 	}
 
 	@Override

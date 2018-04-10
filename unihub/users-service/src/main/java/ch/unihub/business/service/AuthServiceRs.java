@@ -1,5 +1,6 @@
 package ch.unihub.business.service;
 
+import ch.unihub.dom.User;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;
@@ -10,23 +11,27 @@ import javax.annotation.ManagedBean;
 import javax.faces.bean.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
 
+/**
+ * @author Arthur Deschamps
+ */
 @ManagedBean
 @RequestScoped
 @Path("/users")
 public class AuthServiceRs {
     @Inject
-    private UserService service;
+    private UserService userService;
 
     private Logger logger = LoggerFactory.getLogger(AuthServiceRs.class);
 
     @POST
     @Path("/login")
-    @Produces({ "application/json" })
+    @Produces("application/json")
+    @Consumes("application/json")
     public Response login(@NotNull final String username, @NotNull final String password) {
         UsernamePasswordToken token = new UsernamePasswordToken(username, password);
         token.setRememberMe(true);
@@ -62,9 +67,26 @@ public class AuthServiceRs {
 
     @POST
     @Path("/logout")
-    @Produces({ "application/json" })
+    @Produces("application/json")
     public Response logout() {
         SecurityUtils.getSubject().logout();
         return Response.ok().build();
+    }
+
+    @PUT
+    @Path("/add")
+    @Produces("application/json")
+    @Consumes("application/json")
+    public Response addUser(@NotNull final User user) throws URISyntaxException {
+        final String password = user.getPassword();
+        // Checks if the username is already taken
+        if (userService.getUser(user.getUsername()).isPresent())
+            return Response.status(Response.Status.CONFLICT).build();
+        // If user doesn't exist, add it to the database
+        userService.addUser(user, password);
+        return Response
+                .status(Response.Status.CREATED)
+                .contentLocation(new URI("users/by_id/" + user.getId().toString()))
+                .build();
     }
 }

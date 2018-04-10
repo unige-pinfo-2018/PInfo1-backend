@@ -8,10 +8,11 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Optional;
 
+/**
+ * @author Arthur Deschamps
+ */
 @Path("/users")
 public class UserServiceRs {
 	@Inject
@@ -38,21 +39,6 @@ public class UserServiceRs {
 	@Produces({ "application/json" })
 	public Response getUser(@PathParam("id") Long id) {
 		return userResponse(service.getUser(id));
-	}
-
-	@PUT
-	@Path("/add")
-	@Produces({ "application/json" })
-	public Response addUser(@NotNull User user) throws URISyntaxException {
-		// Checks if the username is already taken
-		if (service.getUser(user.getUsername()).isPresent())
-			return Response.status(Response.Status.CONFLICT).build();
-		// If user doesn't exist, add it to the database
-		service.addUser(user);
-		return Response
-				.status(Response.Status.CREATED)
-				.contentLocation(new URI("users/by_id/" + user.getId().toString()))
-				.build();
 	}
 
 	@DELETE
@@ -94,7 +80,6 @@ public class UserServiceRs {
 	private Response userResponse(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<User> userOptional) {
 		if (userOptional.isPresent()) {
 			final User user = userOptional.get();
-			user.setPassword("*****");
 			return Response.ok().entity(user).build();
 		} else return Response.status(Response.Status.NOT_FOUND).build();
 	}
