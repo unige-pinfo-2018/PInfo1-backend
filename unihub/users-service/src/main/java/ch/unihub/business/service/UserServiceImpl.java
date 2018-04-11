@@ -1,6 +1,11 @@
 package ch.unihub.business.service;
 
+
 import ch.unihub.dom.User;
+import org.apache.shiro.authc.credential.DefaultPasswordService;
+import org.apache.shiro.authc.credential.PasswordService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -12,13 +17,19 @@ import javax.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @author Arthur Deschamps
+ */
 @Stateless
 public class UserServiceImpl implements UserService {
 	// The serial-id
 	private static final long serialVersionUID = 1386508985359072399L;
+	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	@PersistenceContext
 	private EntityManager entityManager;
+
+	private PasswordService passwordService = new DefaultPasswordService();
 	
 	@Override
 	public List<User> getAll() {
@@ -60,7 +71,10 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void addUser(@NotNull User user) {
+		// Id will be created automatically
 		user.setId(null);
+    	final String plainPassword = user.getPassword();
+		user.setPassword(passwordService.encryptPassword(plainPassword));
 		entityManager.persist(user);
 	}
 

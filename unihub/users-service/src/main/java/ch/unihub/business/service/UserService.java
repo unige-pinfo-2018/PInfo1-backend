@@ -9,6 +9,9 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @author Arthur Deschamps
+ */
 @Local
 public interface UserService extends Serializable {
 
