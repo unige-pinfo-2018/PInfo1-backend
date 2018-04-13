@@ -124,6 +124,13 @@ public class UserServiceRs {
 		return Response.ok(currentUser.getSession()).build();
 	}
 
+	@GET
+	@Path("isLoggedIn")
+	@Produces("application/json")
+	public Response isLoggedIn() {
+		return Response.ok(SecurityUtils.getSubject().isAuthenticated()).build();
+	}
+
 	@PUT
 	@Path("/add")
 	@Produces("application/json")
