@@ -1,6 +1,7 @@
 package ch.unihub.business.service;
 
 import ch.unihub.dom.AccountConfirmation;
+import ch.unihub.dom.ResetPasswordRequest;
 import ch.unihub.dom.User;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
@@ -181,7 +182,6 @@ public class UserServiceRs {
 		List<AccountConfirmation> confirmations = service.findAccountConfirmations(email);
 		if (confirmations.size() > 0 &&
 				confirmations.stream().anyMatch(accountConfirmation ->
-						accountConfirmation.getUserEmail().equals(email) &&
 						accountConfirmation.getConfirmationId().equals(confirmationId))) {
 			service.getUserByEmail(email).ifPresent(user -> {
 				user.setIsConfirmed(true);
@@ -192,6 +192,40 @@ public class UserServiceRs {
 			service.deleteAccountConfirmations(email);
 			return Response.ok().build();
 		}
+		return Response.status(Response.Status.NOT_FOUND).build();
+	}
+
+	@GET
+	@Path("/request_password_reset")
+	@Produces("application/json")
+	public Response requestPasswordReset(@QueryParam("email") String email) {
+		if (service.getUserByEmail(email).isPresent()) {
+			final String requestId = service.createPasswordResetRequest(email);
+			emailSender.sendPasswordResettingEmail(email, requestId);
+			return Response.ok().build();
+		}
+		return Response.status(Response.Status.NOT_FOUND).build();
+	}
+
+	@POST
+	@Path("/reset_password")
+	@Consumes("application/json")
+	@Produces("application/json")
+	public Response resetPassword(@NotNull final String emailAndRequestIdAndPassword) {
+		JsonObject json = Json.createReader(new StringReader(emailAndRequestIdAndPassword)).readObject();
+		final String email = json.getString("email");
+		final String requestId = json.getString("id");
+		final String newPassword = json.getString("password");
+		List<ResetPasswordRequest> requests = service.findResetPasswordRequests(email);
+		if (requests.size() > 0 && requests.stream().anyMatch(request -> request.getRequestId().equals(requestId))) {
+			service.getUserByEmail(email).ifPresent(user -> {
+				service.updatePassword(user, newPassword);
+			});
+
+			service.deletePasswordRequests(email);
+			return Response.ok().build();
+		}
+
 		return Response.status(Response.Status.NOT_FOUND).build();
 	}
 
