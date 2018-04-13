@@ -2,7 +2,6 @@ package ch.unihub.dom;
 
 import java.io.Serializable;
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,6 +10,10 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import java.sql.Timestamp;
+
 
 @Entity
 @Table(name = "POSTS")
@@ -38,32 +41,34 @@ public class Post implements Serializable {
 	@NotNull
 	@Column(name = "REPLYTOID")
 	private Long replyToId;
-	
-	
+
 	/** The user content */
 	@NotNull
 	@Size(min = 0, max = 400)
 	@Column(name = "CONTENT")
 	private String content;
-	
-	
-	public Post() 
-	{
-		Integer y = 1;
-		long x = y.longValue();
-		
-		this.userId = x;
-		this.parentId = x;
-		this.replyToId = x;
-		this.content = "text";
-	}
-	
-	public Post(Long userId, Long parentId, Long replyToId, String content) 
-	{
-		this.userId = userId;
-		this.parentId = parentId;
-		this.replyToId = replyToId;
-		this.content = content;
+
+    /** The date of the post */
+    @Temporal(TemporalType.TIMESTAMP)
+    @NotNull
+    @Column(name = "DATEPOST")
+    private Date datePost;
+
+	public void copyFields(final Post post) {
+		if (post.getUserId() != null)
+			this.setUserId(post.getUserId());
+
+		if (post.getParentId() != null)
+			this.setParentId(post.getParentId());
+
+		if (post.getReplyToId() != null)
+			this.setReplyToId(post.getReplyToId());
+
+		if (post.getContent() != null)
+			this.setContent(post.getContent());
+
+        if (post.getDatePost() != null)
+            this.setDatePost(post.getDatePost());
 	}
 
 	public final Long getId() {
@@ -105,4 +110,12 @@ public class Post implements Serializable {
 	public final void setContent(String content) {
 		this.content = content;
 	}
+
+    public final Date getDatePost() {
+        return datePost;
+    }
+
+    public final void setDatePost(Date datePost) {
+        this.datePost = datePost;
+    }
 }
