@@ -1,5 +1,6 @@
 package ch.unihub.business.service;
 
+import ch.unihub.dom.AccountConfirmation;
 import ch.unihub.dom.User;
 
 import javax.ejb.Local;
@@ -33,10 +34,35 @@ public interface UserService extends Serializable {
 	Optional<User> getUser(final Long id);
 
     /**
-     * Adds a user to the database.
+     * Finds a user by its email.
+     * @param email The user's email.
+     * @return The {@code User} corresponding to the given email, or an empty optional if not found.
+     */
+	Optional<User> getUserByEmail(final String email);
+
+    /**
+     * Persists a user in database.
      * @param user A {@code User} object.
      */
-	void addUser(@NotNull final User user) throws URISyntaxException;
+	void createUser(@NotNull final User user) throws URISyntaxException;
+
+    /**
+     * Persists an account confirmation in database.
+     * @param user A {@code User} object to create a confirmation for.
+     */
+	void createAccountConfirmation(@NotNull final User user);
+
+    /**
+     * Deletes all account confirmations for the database.
+     * @param userEmail The email linked in the confirmation.
+     */
+	void deleteAccountConfirmations(final String userEmail);
+
+    /**
+     * Finds an account confirmation with the given email.
+     * @param userEmail The email contained in the confirmation.
+     */
+	List<AccountConfirmation> findAccountConfirmations(final String userEmail);
 
     /**
      * Deletes a user from the database, using its id.
