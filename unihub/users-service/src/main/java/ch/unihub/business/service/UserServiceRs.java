@@ -21,6 +21,7 @@ import java.util.Optional;
 /**
  * @author Arthur Deschamps
  */
+
 @Path("/users")
 public class UserServiceRs {
 	@Inject
