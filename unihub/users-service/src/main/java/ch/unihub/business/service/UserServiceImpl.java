@@ -1,6 +1,7 @@
 package ch.unihub.business.service;
 
 
+import ch.unihub.dom.AccountConfirmation;
 import ch.unihub.dom.User;
 import org.apache.shiro.authc.credential.DefaultPasswordService;
 import org.apache.shiro.authc.credential.PasswordService;
@@ -16,6 +17,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * @author Arthur Deschamps
@@ -45,36 +47,26 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Optional<User> getUser(String username) {
-		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-		CriteriaQuery<User> cq = cb.createQuery(User.class);
-
-		Root<User> root = cq.from(User.class);
-		Predicate usernameCond = cb.equal(root.get("username"), username);
-		cq.where(usernameCond);
-		TypedQuery<User> query = entityManager.createQuery(cq);
-		List<User> results = query.getResultList();
-		return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+		return getUser("username", username);
 	}
 
 	@Override
 	public Optional<User> getUser(Long id) {
-		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-		CriteriaQuery<User> cq = cb.createQuery(User.class);
-
-		Root<User> root = cq.from(User.class);
-		Predicate idCond = cb.equal(root.get("id"), id);
-		cq.where(idCond);
-		TypedQuery<User> query = entityManager.createQuery(cq);
-		List<User> results = query.getResultList();
-		return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+		return getUser("id", id);
 	}
 
 	@Override
-	public void addUser(@NotNull User user) {
+	public Optional<User> getUserByEmail(String email) {
+		return getUser("email", email);
+	}
+
+	@Override
+	public void createUser(@NotNull User user) {
 		// Id will be created automatically
 		user.setId(null);
     	final String plainPassword = user.getPassword();
 		user.setPassword(passwordService.encryptPassword(plainPassword));
+		// Saves the user in DB
 		entityManager.persist(user);
 	}
 
@@ -102,14 +94,62 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Optional<User> updateUser(User updatedUser) {
-		Optional<User> user = getUser(updatedUser.getId());
-		if (!user.isPresent()) return Optional.empty();
-		user.get().copyFields(updatedUser);
-		return user;
+		Optional<User> userOpt = getUser(updatedUser.getId());
+		userOpt.ifPresent(user -> {
+			user.copyFields(updatedUser);
+			entityManager.persist(user);
+		});
+		return userOpt;
+	}
+
+	@Override
+	public Optional<String> createAccountConfirmation(User user) {
+		if (user.getEmail() != null && !user.isConfirmed()) {
+			final AccountConfirmation accountConfirmation = new AccountConfirmation();
+			accountConfirmation.setId(null);
+			// Random 36-characters string.
+			final String confirmationId = UUID.randomUUID().toString();
+			accountConfirmation.setConfirmationId(confirmationId);
+			accountConfirmation.setUserEmail(user.getEmail());
+			entityManager.persist(accountConfirmation);
+			return Optional.of(confirmationId);
+		}
+		return Optional.empty();
+	}
+
+	@Override
+	public void deleteAccountConfirmations(String userEmail) {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaDelete<AccountConfirmation> delete = cb.createCriteriaDelete(AccountConfirmation.class);
+
+		Root<AccountConfirmation> root = delete.from(AccountConfirmation.class);
+		delete.where(cb.equal(root.get("userEmail"), userEmail));
+		// No need to check for results, there could not be any confirmations for the given email
+		entityManager.createQuery(delete).executeUpdate();
+	}
+
+	@Override
+	public List<AccountConfirmation> findAccountConfirmations(String userEmail) {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<AccountConfirmation> query = cb.createQuery(AccountConfirmation.class);
+
+		Root<AccountConfirmation> root = query.from(AccountConfirmation.class);
+		query.where(cb.equal(root.get("userEmail"), userEmail));
+		return entityManager.createQuery(query).getResultList();
 	}
 
 	@Override
 	public int getNbUsers() {
 		return getAll().size();
+	}
+
+	private <T> Optional<User> getUser(String predicateField, T predicatedValue) {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<User> cq = cb.createQuery(User.class);
+		Root<User> root = cq.from(User.class);
+		cq.where(cb.equal(root.get(predicateField), predicatedValue));
+		TypedQuery<User> query = entityManager.createQuery(cq);
+		List<User> results = query.getResultList();
+		return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
 	}
 }

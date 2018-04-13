@@ -41,6 +41,13 @@ public class User implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private Role role;
 
+	@Column(name = "CURRICULUM")
+	@Enumerated(EnumType.STRING)
+	private Curriculum curriculum;
+
+	@Column(name = "CONFIRMED")
+	private Boolean confirmed;
+
 	/**
 	 * Updates this fields with the given {@code User} object.
 	 * @param user A user object to copy the fields from.
@@ -52,6 +59,10 @@ public class User implements Serializable {
 			this.setEmail(user.getEmail());
 		if (user.getRole() != null)
 			this.setRole(user.getRole());
+		if (user.isConfirmed() != null)
+			this.setIsConfirmed(user.isConfirmed());
+		if (user.getCurriculum() != null)
+			this.setCurriculum(user.getCurriculum());
 	}
 
 	public final Long getId() {
@@ -92,5 +103,21 @@ public class User implements Serializable {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public Boolean isConfirmed() {
+		return confirmed;
+	}
+
+	public void setIsConfirmed(Boolean confirmed) {
+		this.confirmed = confirmed;
+	}
+
+	public Curriculum getCurriculum() {
+		return curriculum;
+	}
+
+	public void setCurriculum(Curriculum curriculum) {
+		this.curriculum = curriculum;
 	}
 }

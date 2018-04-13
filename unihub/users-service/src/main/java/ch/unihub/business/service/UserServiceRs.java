@@ -1,5 +1,6 @@
 package ch.unihub.business.service;
 
+import ch.unihub.dom.AccountConfirmation;
 import ch.unihub.dom.User;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
@@ -16,7 +17,9 @@ import javax.ws.rs.core.Response;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * @author Arthur Deschamps
@@ -26,6 +29,9 @@ import java.util.Optional;
 public class UserServiceRs {
 	@Inject
 	private UserService service;
+
+	@Inject
+	private EmailSender emailSender;
 
 	private Logger logger = LoggerFactory.getLogger(UserServiceRs.class);
 
@@ -48,6 +54,14 @@ public class UserServiceRs {
 	@Produces({ "application/json" })
 	public Response getUser(@PathParam("id") Long id) {
 		return userResponse(service.getUser(id));
+	}
+
+	@GET
+	@Path("/by_email/{email}")
+	@Produces({ "application/json" })
+	public Response getUserByEmail(@PathParam("email") String email) {
+		logger.info("trying to find a user by its email");
+		return userResponse(service.getUserByEmail(email));
 	}
 
 	@DELETE
@@ -139,12 +153,46 @@ public class UserServiceRs {
 		// Checks if the username is already taken
 		if (service.getUser(user.getUsername()).isPresent())
 			return Response.status(Response.Status.CONFLICT).build();
-		// If user doesn't exist, add it to the database
-		service.addUser(user);
+		// Verifies for malformed fields
+		if (user.getEmail() == null || user.getUsername() == null || user.getUsername().length() < 2 ||
+				user.getUsername().length() > 35 || user.getPassword() == null || user.getPassword().length() < 2 ||
+				user.getPassword().length() > 1000)
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		// If user doesn't exist and all fields are correct, add it to the database
+		user.setIsConfirmed(false);
+		// Deletes all potential confirmations (since a confirmation must be unique).
+		service.deleteAccountConfirmations(user.getEmail());
+		service.createUser(user);
+		// Creates an account confirmation
+		service.createAccountConfirmation(user).ifPresent(confirmationId ->
+			// Sends the confirmation link by email to the user
+            emailSender.sendRegistrationMail(user.getEmail(), user.getUsername(), confirmationId)
+        );
 		return Response
 				.status(Response.Status.CREATED)
 				.contentLocation(new URI("users/by_id/" + user.getId().toString()))
 				.build();
+	}
+
+	@GET
+	@Path("/confirm")
+	@Produces("application/json")
+	public Response confirmUser(@QueryParam("email") String email, @QueryParam("id") String confirmationId) {
+		List<AccountConfirmation> confirmations = service.findAccountConfirmations(email);
+		if (confirmations.size() > 0 &&
+				confirmations.stream().anyMatch(accountConfirmation ->
+						accountConfirmation.getUserEmail().equals(email) &&
+						accountConfirmation.getConfirmationId().equals(confirmationId))) {
+			service.getUserByEmail(email).ifPresent(user -> {
+				user.setIsConfirmed(true);
+				service.updateUser(user);
+			});
+			// Deletes all potential account confirmations since the user was either confirmed or doesn't exist in
+			// database.
+			service.deleteAccountConfirmations(email);
+			return Response.ok().build();
+		}
+		return Response.status(Response.Status.NOT_FOUND).build();
 	}
 
 	private Response userResponse(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<User> userOptional) {
