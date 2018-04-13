@@ -1,11 +1,13 @@
 package ch.unihub.business.service;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.List;
 import javax.ejb.Local;
 import javax.validation.constraints.NotNull;
 import java.net.URISyntaxException;
 import java.util.Optional;
+import java.util.Date;
 
 import ch.unihub.dom.Dislike;
 import ch.unihub.dom.Like;
@@ -18,6 +20,9 @@ public interface PostService extends Serializable {
 	//get all post
 	List<Post> getAll();
 
+	//id of all tags with this idPost
+	List<Long> getListIdTags(Long idPost);
+
 	//get the number of post
 	int getNbPosts();
 
@@ -25,13 +30,13 @@ public interface PostService extends Serializable {
 	Optional<Post> getPost(final Long id);
 
     //get a like with the id
-    Optional<Like> getLike(final Long id);
+    Optional<Like> getLike(final Long value, String columnId);
 
     //get a dislike with the id
-    Optional<Dislike> getDislike(final Long id);
+    Optional<Dislike> getDislike(final Long value, String columnId);
 
     //get a dislike with the id
-    Optional<Tag> getTag(final Long id);
+    Optional<Tag> getTag(final String value, String columnId);
 
 	//get a userId of post with the id
 	Long getUserIdPost(final Long id);
@@ -45,6 +50,11 @@ public interface PostService extends Serializable {
     //get a ReplyToId of post with the id
     Long getNbUpvotes(final Long idPost);
 
+	//get date of post with the id
+	Date getDate(final Long idPost);
+
+	//get text of post with the id
+	String getContent(final Long idPost);
 	//add post 
 	void addPost(@NotNull final Post post);
 

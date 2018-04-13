@@ -1,5 +1,6 @@
 package ch.unihub.business.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -13,6 +14,8 @@ import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.NotFoundException;
 import java.util.List;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Optional;
 
 import ch.unihub.dom.Post;
@@ -61,13 +64,13 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
-	public Optional<Like> getLike(Long id)
+	public Optional<Like> getLike(Long value,String columnId)
 	{
 		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Like> cq = qb.createQuery(Like.class);
 
 		Root<Like> root = cq.from(Like.class);
-		Predicate idCond = qb.equal(root.get("id"), id);
+		Predicate idCond = qb.equal(root.get(columnId), value);
 		cq.where(idCond);
 
 		TypedQuery<Like> query = entityManager.createQuery(cq);
@@ -76,13 +79,13 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
-	public Optional<Dislike> getDislike(Long id)
+	public Optional<Dislike> getDislike(Long value,String columnId)
 	{
 		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Dislike> cq = qb.createQuery(Dislike.class);
 
 		Root<Dislike> root = cq.from(Dislike.class);
-		Predicate idCond = qb.equal(root.get("id"), id);
+		Predicate idCond = qb.equal(root.get(columnId), value);
 		cq.where(idCond);
 
 		TypedQuery<Dislike> query = entityManager.createQuery(cq);
@@ -91,13 +94,22 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
-	public Optional<Tag> getTag(Long id)
+	public Optional<Tag> getTag(String value,String columnId)
 	{
 		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Tag> cq = qb.createQuery(Tag.class);
 
 		Root<Tag> root = cq.from(Tag.class);
-		Predicate idCond = qb.equal(root.get("id"), id);
+		Predicate idCond;
+		if (columnId.equals("name"))
+		{
+			idCond = qb.equal(root.get(columnId), value);
+		}
+		else
+		{
+			Long valueLong = Long.valueOf(value).longValue();
+			idCond = qb.equal(root.get(columnId), valueLong);
+		}
 		cq.where(idCond);
 
 		TypedQuery<Tag> query = entityManager.createQuery(cq);
@@ -108,6 +120,12 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public void addPost(@NotNull Post newPost) {
 		newPost.setId(null);
+		Date date= new Date();
+		//getTime() returns current time in milliseconds
+		long time = date.getTime();
+		//Passed the milliseconds to constructor of Timestamp class
+		Timestamp ts = new Timestamp(time);
+		newPost.setDatePost(ts);
 		entityManager.persist(newPost);
 	}
 
@@ -192,6 +210,53 @@ public class PostServiceImpl implements PostService {
 		nbUpvotes -= query2.getResultList().size();
 		return nbUpvotes;
 	}
+
+	@Override
+	public Date getDate(Long id)
+	{
+		Optional<Post> thePost = getPost(id);
+		Date date= new Date();
+		//getTime() returns current time in milliseconds
+		long time = date.getTime();
+		//Passed the milliseconds to constructor of Timestamp class
+		Timestamp ts = new Timestamp(time);
+		return thePost.isPresent() ? thePost.get().getDatePost() : ts;
+	}
+
+	@Override
+	public String getContent(Long id)
+	{
+		Optional<Post> thePost = getPost(id);
+		if (thePost.isPresent())
+		{
+			return thePost.get().getContent();
+		}
+		else
+		{
+			return "";
+		}
+	}
+
+	@Override
+	public List<Long> getListIdTags(Long idPost) {
+
+	    List<Long> listIdTags= new ArrayList<Long>();
+        CriteriaBuilder qb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tag> cq = qb.createQuery(Tag.class);
+
+        Root<Tag> root = cq.from(Tag.class);
+        Predicate idCond = qb.equal(root.get("postId"), idPost);
+        cq.where(idCond);
+
+        TypedQuery<Tag> query = entityManager.createQuery(cq);
+        List<Tag> listTags = query.getResultList();
+
+        for (Tag element : listTags)
+        {
+            listIdTags.add(element.getId());
+        }
+        return listIdTags;
+    }
 
     @Override
     public Optional<Post> updatePost(Post updatedPost) {

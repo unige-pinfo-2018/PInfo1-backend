@@ -10,6 +10,10 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import java.sql.Timestamp;
+
 
 @Entity
 @Table(name = "POSTS")
@@ -44,6 +48,12 @@ public class Post implements Serializable {
 	@Column(name = "CONTENT")
 	private String content;
 
+    /** The date of the post */
+    @Temporal(TemporalType.TIMESTAMP)
+    @NotNull
+    @Column(name = "DATEPOST")
+    private Date datePost;
+
 	public void copyFields(final Post post) {
 		if (post.getUserId() != null)
 			this.setUserId(post.getUserId());
@@ -56,6 +66,9 @@ public class Post implements Serializable {
 
 		if (post.getContent() != null)
 			this.setContent(post.getContent());
+
+        if (post.getDatePost() != null)
+            this.setDatePost(post.getDatePost());
 	}
 
 	public final Long getId() {
@@ -97,4 +110,12 @@ public class Post implements Serializable {
 	public final void setContent(String content) {
 		this.content = content;
 	}
+
+    public final Date getDatePost() {
+        return datePost;
+    }
+
+    public final void setDatePost(Date datePost) {
+        this.datePost = datePost;
+    }
 }

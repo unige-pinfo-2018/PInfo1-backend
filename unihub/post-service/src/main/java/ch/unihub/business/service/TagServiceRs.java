@@ -26,10 +26,10 @@ public class TagServiceRs
     private PostService service;
 
     @GET
-    @Path("/by_id/{id}")
+    @Path("/by/{columnId}/{value}")
     @Produces({ "application/json" })
-    public Response getTag(@PathParam("id") Long id) {
-        return tagResponse(service.getTag(id));
+    public Response getTag(@PathParam("value") String value,@PathParam("columnId") String columnId) {
+        return tagResponse(service.getTag(value,columnId));
     }
 
     private Response tagResponse(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<Tag> tagOptional) {

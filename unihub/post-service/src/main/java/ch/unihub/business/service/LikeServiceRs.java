@@ -26,10 +26,10 @@ public class LikeServiceRs
     private PostService service;
 
     @GET
-    @Path("/by_id/{id}")
+    @Path("/by/{columnId}/{value}")
     @Produces({ "application/json" })
-    public Response getLike(@PathParam("id") Long id) {
-        return likeResponse(service.getLike(id));
+    public Response getLike(@PathParam("value") Long value,@PathParam("columnId") String columnId) {
+        return likeResponse(service.getLike(value,columnId));
     }
 
     private Response likeResponse(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<Like> likeOptional) {

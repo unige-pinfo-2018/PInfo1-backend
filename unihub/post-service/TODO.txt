@@ -1,42 +1,54 @@
--methods get informations 
-	Long getParentId(Id) 				[Done]
-	Long getReplyToId(Id)				[Done]
-	Long getNbUpvote(Id)				[Done]
-	String getTag(Id)				
-	List<Post id> getAllChildrenPost(Post)		
-	List<Post id> getALLReplyToPost(Post)		
-	List<Post id> getLatestPost(number,?critere?)	
+------methods get informations 
+POSTS
+	nbPost()					[Done]
+	posts /by_id/{id}				[Done]
+	/userId_by_id/{id}				[Done]
+	/parentId_by_id/{id}				[Done]
+	/replytoId_by_id/{id}				[Done]
+	/nbUpvotes_by_id/{idPost}			[Done]
+	/listIdTags_by_id/{idPost}			[Done]
+	/date_by_id/{idPost}				[Done]
+	/content_by_id/{idPost}				[Done]
+	getAllChildrenPost{idPost}			[]
+	getALLReplyToPost(Post)				[]
+	getLatestPost(number,IdTag)			[]
+LIKE
+	/by/{column}/{value}				[Done]
+DISLIKE
+	/by/{column}/{value}				[Done]
+TAGS
+	/by/{column}/{value}				[Done]
 
--methods put informations
+
+-----methods put informations 
+POSTS
+	addPost()					[Done]	
+LIKES
 	addLike()					[Done]
+DISLIKES
 	addDislike()					[Done]
-	addTag() 					[Done]
-
--method e to delete 
-	like
-	dislike
-	post
-	tag
-
-
-//not in table POSTS but it's linked so..
--creat table 						[Done]
-	like						[Done]
-		id
-		postId
-		userId
-	dislike						[Done]
-		id
-		postId
-		userId
-	Tag						[Done]
-		id
-		postId
-	
--add column date in posts table
-
--creat unity test
+TAGS
+	addDislike()					[Done]
 
 
 
+
+-----methods put informations 
+POSTS
+	update_post()					[Done]
+
+
+
+-----methode to delete 
+	like						[]
+	dislike						[]
+	post						[]
+	tag						[]
+
+
+--creat test						[]
+--faire function json more simply			[]
 Like and Dislike could be childs of UserActionToPost
+
+		
+

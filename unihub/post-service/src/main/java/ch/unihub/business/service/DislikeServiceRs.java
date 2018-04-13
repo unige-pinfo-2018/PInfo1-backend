@@ -26,11 +26,12 @@ public class DislikeServiceRs
     private PostService service;
 
     @GET
-    @Path("/by_id/{id}")
+    @Path("/by/{columnId}/{value}")
     @Produces({ "application/json" })
-    public Response getDislike(@PathParam("id") Long id) {
-        return dislikeResponse(service.getDislike(id));
+    public Response getDislike(@PathParam("value") Long value,@PathParam("columnId") String columnId) {
+        return dislikeResponse(service.getDislike(value,columnId));
     }
+
 
     private Response dislikeResponse(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<Dislike> dislikeOptional) {
         if (dislikeOptional.isPresent()) {

@@ -14,6 +14,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import ch.unihub.dom.Post;
@@ -74,6 +77,27 @@ public class PostServiceRs {
 	@Produces({ "application/json" })
 	public Long getNbUpvotes(@PathParam("idPost") Long idPost) {
 		return service.getNbUpvotes(idPost);
+	}
+
+	@GET
+	@Path("/date_by_id/{idPost}")
+	@Produces({ "application/json" })
+	public Date getDate(@PathParam("idPost") Long idPost) {
+		return service.getDate(idPost);
+	}
+
+	@GET
+	@Path("/content_by_id/{idPost}")
+	@Produces({ "application/json" })
+	public String getContent(@PathParam("idPost") Long idPost) {
+		return "{\"content\":\"" + service.getContent(idPost) + "\"}" ;
+	}
+
+	@GET
+	@Path("/listIdTags_by_id/{idPost}")
+	@Produces({ "application/json" })
+	public List<Long> getListIdTags(@PathParam("idPost") Long idPost) {
+		return service.getListIdTags(idPost);
 	}
 
 	@PUT
