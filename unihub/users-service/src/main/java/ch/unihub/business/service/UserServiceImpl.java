@@ -103,15 +103,18 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void createAccountConfirmation(User user) {
+	public Optional<String> createAccountConfirmation(User user) {
 		if (user.getEmail() != null && !user.isConfirmed()) {
 			final AccountConfirmation accountConfirmation = new AccountConfirmation();
 			accountConfirmation.setId(null);
 			// Random 36-characters string.
-			accountConfirmation.setConfirmationId(UUID.randomUUID().toString());
+			final String confirmationId = UUID.randomUUID().toString();
+			accountConfirmation.setConfirmationId(confirmationId);
 			accountConfirmation.setUserEmail(user.getEmail());
 			entityManager.persist(accountConfirmation);
+			return Optional.of(confirmationId);
 		}
+		return Optional.empty();
 	}
 
 	@Override

@@ -157,8 +157,10 @@ public class UserServiceRs {
 		service.deleteAccountConfirmations(user.getEmail());
 		service.createUser(user);
 		// Creates an account confirmation
-		service.createAccountConfirmation(user);
-
+		service.createAccountConfirmation(user).ifPresent(confirmationId ->
+			// Sends the confirmation link by email to the user
+            emailSender.sendRegistrationMail(user.getEmail(), user.getUsername(), confirmationId)
+        );
 		return Response
 				.status(Response.Status.CREATED)
 				.contentLocation(new URI("users/by_id/" + user.getId().toString()))

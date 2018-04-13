@@ -49,8 +49,9 @@ public interface UserService extends Serializable {
     /**
      * Persists an account confirmation in database.
      * @param user A {@code User} object to create a confirmation for.
+     * @return The confirmation ID, if the email is not null and the user is not yet confirmed.
      */
-	void createAccountConfirmation(@NotNull final User user);
+	Optional<String> createAccountConfirmation(@NotNull final User user);
 
     /**
      * Deletes all account confirmations for the database.
