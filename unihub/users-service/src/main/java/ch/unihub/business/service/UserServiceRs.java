@@ -1,6 +1,7 @@
 package ch.unihub.business.service;
 
 import ch.unihub.dom.AccountConfirmation;
+import ch.unihub.dom.ResetPasswordRequest;
 import ch.unihub.dom.User;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
@@ -95,9 +96,12 @@ public class UserServiceRs {
 	@Produces({ "application/json" })
 	public Response updateUser(@NotNull final User user) {
 		final Optional<User> updatedUserOptional = service.updateUser(user);
-		return updatedUserOptional.isPresent() ?
-				Response.ok(updatedUserOptional.get()).build() :
-				Response.status(Response.Status.NOT_FOUND).build();
+		if (updatedUserOptional.isPresent()) {
+			final User updatedUser = updatedUserOptional.get();
+			updatedUser.setPassword("******");
+			return Response.ok(updatedUser).build();
+		}
+		return Response.status(Response.Status.NOT_FOUND).build();
 	}
 
 	@POST
@@ -139,7 +143,7 @@ public class UserServiceRs {
 	}
 
 	@GET
-	@Path("isLoggedIn")
+	@Path("/isLoggedIn")
 	@Produces("application/json")
 	public Response isLoggedIn() {
 		return Response.ok(SecurityUtils.getSubject().isAuthenticated()).build();
@@ -181,7 +185,6 @@ public class UserServiceRs {
 		List<AccountConfirmation> confirmations = service.findAccountConfirmations(email);
 		if (confirmations.size() > 0 &&
 				confirmations.stream().anyMatch(accountConfirmation ->
-						accountConfirmation.getUserEmail().equals(email) &&
 						accountConfirmation.getConfirmationId().equals(confirmationId))) {
 			service.getUserByEmail(email).ifPresent(user -> {
 				user.setIsConfirmed(true);
@@ -192,6 +195,39 @@ public class UserServiceRs {
 			service.deleteAccountConfirmations(email);
 			return Response.ok().build();
 		}
+		return Response.status(Response.Status.NOT_FOUND).build();
+	}
+
+	@GET
+	@Path("/request_password_reset")
+	@Produces("application/json")
+	public Response requestPasswordReset(@QueryParam("email") String email) {
+		if (service.getUserByEmail(email).isPresent()) {
+			final String requestId = service.createPasswordResetRequest(email);
+			emailSender.sendPasswordResettingEmail(email, requestId);
+			return Response.ok().build();
+		}
+		return Response.status(Response.Status.NOT_FOUND).build();
+	}
+
+	@POST
+	@Path("/reset_password")
+	@Consumes("application/json")
+	@Produces("application/json")
+	public Response resetPassword(@NotNull final String emailAndRequestIdAndPassword) {
+		JsonObject json = Json.createReader(new StringReader(emailAndRequestIdAndPassword)).readObject();
+		final String email = json.getString("email");
+		final String requestId = json.getString("id");
+		final String newPassword = json.getString("password");
+		if (email == null || requestId == null || newPassword == null)
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		List<ResetPasswordRequest> requests = service.findResetPasswordRequests(email);
+		if (requests.size() > 0 && requests.stream().anyMatch(request -> request.getRequestId().equals(requestId))) {
+			service.getUserByEmail(email).ifPresent(user -> service.updatePassword(user, newPassword));
+			service.deletePasswordRequests(email);
+			return Response.ok().build();
+		}
+
 		return Response.status(Response.Status.NOT_FOUND).build();
 	}
 

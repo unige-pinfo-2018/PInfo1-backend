@@ -9,10 +9,10 @@ import java.io.Serializable;
  * @author Arthur Deschamps
  */
 @Entity
-@Table(name = "ACCOUNT_CONFIRMATIONS")
-public class AccountConfirmation implements Serializable {
+@Table(name = "RESET_PASSWORD_REQUEST")
+public class ResetPasswordRequest implements Serializable {
 
-    private static final long serialVersionUID = 5922499249530705338L;
+    private static final long serialVersionUID = 8189638718050542908L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,9 +24,9 @@ public class AccountConfirmation implements Serializable {
     private String userEmail;
 
     @NotNull
+    @Column(name ="REQUEST_ID")
     @Size(min = 36, max = 50)
-    @Column(name = "CONFIRMATION_ID")
-    private String confirmationId;
+    private String requestId;
 
     public Long getId() {
         return id;
@@ -36,19 +36,19 @@ public class AccountConfirmation implements Serializable {
         this.id = id;
     }
 
-    public String getConfirmationId() {
-        return confirmationId;
-    }
-
-    public void setConfirmationId(String confirmationId) {
-        this.confirmationId = confirmationId;
-    }
-
     public String getUserEmail() {
         return userEmail;
     }
 
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
+    public void setUserEmail(String emailAddress) {
+        this.userEmail = emailAddress;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 }

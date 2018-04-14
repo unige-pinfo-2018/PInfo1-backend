@@ -2,6 +2,7 @@ package ch.unihub.business.service;
 
 
 import ch.unihub.dom.AccountConfirmation;
+import ch.unihub.dom.ResetPasswordRequest;
 import ch.unihub.dom.User;
 import org.apache.shiro.authc.credential.DefaultPasswordService;
 import org.apache.shiro.authc.credential.PasswordService;
@@ -32,7 +33,7 @@ public class UserServiceImpl implements UserService {
 	private EntityManager entityManager;
 
 	private PasswordService passwordService = new DefaultPasswordService();
-	
+
 	@Override
 	public List<User> getAll() {
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -61,11 +62,16 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public String encryptPassword(String plainPassword) {
+		return passwordService.encryptPassword(plainPassword);
+	}
+
+	@Override
 	public void createUser(@NotNull User user) {
 		// Id will be created automatically
 		user.setId(null);
     	final String plainPassword = user.getPassword();
-		user.setPassword(passwordService.encryptPassword(plainPassword));
+		user.setPassword(encryptPassword(plainPassword));
 		// Saves the user in DB
 		entityManager.persist(user);
 	}
@@ -103,6 +109,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public void updatePassword(User user, String password) {
+		user.setPassword(encryptPassword(password));
+		entityManager.merge(user);
+	}
+
+	@Override
 	public Optional<String> createAccountConfirmation(User user) {
 		if (user.getEmail() != null && !user.isConfirmed()) {
 			final AccountConfirmation accountConfirmation = new AccountConfirmation();
@@ -124,7 +136,7 @@ public class UserServiceImpl implements UserService {
 
 		Root<AccountConfirmation> root = delete.from(AccountConfirmation.class);
 		delete.where(cb.equal(root.get("userEmail"), userEmail));
-		// No need to check for results, there could not be any confirmations for the given email
+		// No need to check for results, there could no confirmation for the given email
 		entityManager.createQuery(delete).executeUpdate();
 	}
 
@@ -136,6 +148,37 @@ public class UserServiceImpl implements UserService {
 		Root<AccountConfirmation> root = query.from(AccountConfirmation.class);
 		query.where(cb.equal(root.get("userEmail"), userEmail));
 		return entityManager.createQuery(query).getResultList();
+	}
+
+	@Override
+	public String createPasswordResetRequest(String userEmail) {
+		ResetPasswordRequest request = new ResetPasswordRequest();
+		request.setUserEmail(userEmail);
+		final String requestId = UUID.randomUUID().toString();
+		request.setRequestId(requestId);
+		entityManager.persist(request);
+		return requestId;
+	}
+
+	@Override
+	public List<ResetPasswordRequest> findResetPasswordRequests(String userEmail) {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<ResetPasswordRequest> query = cb.createQuery(ResetPasswordRequest.class);
+
+		Root<ResetPasswordRequest> root = query.from(ResetPasswordRequest.class);
+		query.where(cb.equal(root.get("userEmail"), userEmail));
+		return entityManager.createQuery(query).getResultList();
+	}
+
+	@Override
+	public void deletePasswordRequests(String userEmail) {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaDelete<ResetPasswordRequest> delete = cb.createCriteriaDelete(ResetPasswordRequest.class);
+
+		Root<ResetPasswordRequest> root = delete.from(ResetPasswordRequest.class);
+		delete.where(cb.equal(root.get("userEmail"), userEmail));
+		// No need to check for results, there could be no request for that email.
+		entityManager.createQuery(delete).executeUpdate();
 	}
 
 	@Override
