@@ -8,6 +8,9 @@ import org.simplejavamail.mailer.MailerBuilder;
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
 
+/**
+ * @author Arthur Deschamps
+ */
 @Stateless
 public class EmailSender {
 

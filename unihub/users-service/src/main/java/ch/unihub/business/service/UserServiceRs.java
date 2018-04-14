@@ -96,9 +96,12 @@ public class UserServiceRs {
 	@Produces({ "application/json" })
 	public Response updateUser(@NotNull final User user) {
 		final Optional<User> updatedUserOptional = service.updateUser(user);
-		return updatedUserOptional.isPresent() ?
-				Response.ok(updatedUserOptional.get()).build() :
-				Response.status(Response.Status.NOT_FOUND).build();
+		if (updatedUserOptional.isPresent()) {
+			final User updatedUser = updatedUserOptional.get();
+			updatedUser.setPassword("******");
+			return Response.ok(updatedUser).build();
+		}
+		return Response.status(Response.Status.NOT_FOUND).build();
 	}
 
 	@POST
@@ -140,7 +143,7 @@ public class UserServiceRs {
 	}
 
 	@GET
-	@Path("isLoggedIn")
+	@Path("/isLoggedIn")
 	@Produces("application/json")
 	public Response isLoggedIn() {
 		return Response.ok(SecurityUtils.getSubject().isAuthenticated()).build();
@@ -216,12 +219,11 @@ public class UserServiceRs {
 		final String email = json.getString("email");
 		final String requestId = json.getString("id");
 		final String newPassword = json.getString("password");
+		if (email == null || requestId == null || newPassword == null)
+			return Response.status(Response.Status.BAD_REQUEST).build();
 		List<ResetPasswordRequest> requests = service.findResetPasswordRequests(email);
 		if (requests.size() > 0 && requests.stream().anyMatch(request -> request.getRequestId().equals(requestId))) {
-			service.getUserByEmail(email).ifPresent(user -> {
-				service.updatePassword(user, newPassword);
-			});
-
+			service.getUserByEmail(email).ifPresent(user -> service.updatePassword(user, newPassword));
 			service.deletePasswordRequests(email);
 			return Response.ok().build();
 		}

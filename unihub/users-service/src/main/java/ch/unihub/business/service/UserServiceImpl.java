@@ -111,7 +111,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void updatePassword(User user, String password) {
 		user.setPassword(encryptPassword(password));
-		entityManager.persist(user);
+		entityManager.merge(user);
 	}
 
 	@Override

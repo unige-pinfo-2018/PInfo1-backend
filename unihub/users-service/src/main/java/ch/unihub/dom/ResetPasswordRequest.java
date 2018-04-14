@@ -5,6 +5,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 
+/**
+ * @author Arthur Deschamps
+ */
 @Entity
 @Table(name = "RESET_PASSWORD_REQUEST")
 public class ResetPasswordRequest implements Serializable {
