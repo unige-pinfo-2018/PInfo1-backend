@@ -31,8 +31,8 @@ public class EmailSender {
                 .from(from, fromAddress)
                 .to(username, emailAddress)
                 .withSubject("UniHub - Confirm your account")
-                .withHTMLText("<p>Please click on the following link to confirm your account on UniHub:</p>" +
-                        "<p>" + confirmationLink(emailAddress, confirmationId) + "</p>")
+                .withHTMLText("<p>Please copy and paste the code bellow in UniHub:</p>" +
+                        "<p><b>" + emailAddress + "&id=" + confirmationId + "</b></p>")
                 .buildEmail();
 
         mailer.sendMail(email);
@@ -46,21 +46,9 @@ public class EmailSender {
                 .to(emailAddress, emailAddress)
                 .withSubject("UniHub - Reset your password")
                 .withHTMLText("<p>Please click on the following link to reset your account's password on UniHub</p>" +
-                "<p>" + resetPasswordLink(emailAddress, passwordResetRequestId) + "</p>")
+                "<p><b>" + passwordResetRequestId + "</b></p>")
                 .buildEmail();
 
         mailer.sendMail(email);
-    }
-
-    private String confirmationLink(final String emailAddress, final String confirmationId) {
-        // TODO: make it relative somehow ????
-        return "http://localhost:18080/users-service/rest/users/confirm?email=" + emailAddress +
-                "&id=" + confirmationId;
-    }
-
-    private String resetPasswordLink(final String emailAddress, final String passwordResetRequestId) {
-        // TODO: put url of a client page
-        return "http://localhost:18080/users-service/rest/users/reset_password?email=" + emailAddress +
-                "&id=" + passwordResetRequestId;
     }
 }
