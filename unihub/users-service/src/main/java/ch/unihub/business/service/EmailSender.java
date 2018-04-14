@@ -45,7 +45,7 @@ public class EmailSender {
                 .from(from, fromAddress)
                 .to(emailAddress, emailAddress)
                 .withSubject("UniHub - Reset your password")
-                .withHTMLText("<p>Please click on the following link to reset your account's password on UniHub</p>" +
+                .withHTMLText("<p>Please copy and paste the code bellow in UniHub:</p>" +
                 "<p><b>" + passwordResetRequestId + "</b></p>")
                 .buildEmail();
 
