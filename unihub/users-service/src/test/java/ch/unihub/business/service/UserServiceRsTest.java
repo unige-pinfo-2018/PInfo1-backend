@@ -8,6 +8,8 @@ import java.net.URISyntaxException;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
+import ch.unihub.dom.Curriculum;
+import ch.unihub.dom.Role;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -59,8 +61,15 @@ public class UserServiceRsTest {
 	
 	@Test
 	public void t4_shouldAddUserReturn200() throws URISyntaxException {
-		User User = new User("Doe", "Jane", "mail");
-		sut.addUser(User);
+    	User user = new User(
+    			"JaneDoe",
+				"weakpassword",
+				"mail@email.com",
+				Role.USER,
+				Curriculum.DOCTOR,
+				true
+		);
+		sut.addUser(user);
 		Response result = sut.getUser((long) 1);
 		Assert.assertEquals(200, result.getStatus());
 	}

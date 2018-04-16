@@ -1,21 +1,38 @@
 package ch.unihub.business.service;
 
+import ch.unihub.dom.AccountConfirmation;
+import ch.unihub.dom.ResetPasswordRequest;
 import ch.unihub.dom.User;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.*;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+
+/**
+ * @author Arthur Deschamps
+ */
 
 @Path("/users")
 public class UserServiceRs {
 	@Inject
 	private UserService service;
+
+	@Inject
+	private EmailSender emailSender;
 
 	private Logger logger = LoggerFactory.getLogger(UserServiceRs.class);
 
@@ -40,19 +57,12 @@ public class UserServiceRs {
 		return userResponse(service.getUser(id));
 	}
 
-	@PUT
-	@Path("/add")
+	@GET
+	@Path("/by_email/{email}")
 	@Produces({ "application/json" })
-	public Response addUser(@NotNull User user) throws URISyntaxException {
-		// Checks if the username is already taken
-		if (service.getUser(user.getUsername()).isPresent())
-			return Response.status(Response.Status.CONFLICT).build();
-		// If user doesn't exist, add it to the database
-		service.addUser(user);
-		return Response
-				.status(Response.Status.CREATED)
-				.contentLocation(new URI("users/by_id/" + user.getId().toString()))
-				.build();
+	public Response getUserByEmail(@PathParam("email") String email) {
+		logger.info("trying to find a user by its email");
+		return userResponse(service.getUserByEmail(email));
 	}
 
 	@DELETE
@@ -86,9 +96,139 @@ public class UserServiceRs {
 	@Produces({ "application/json" })
 	public Response updateUser(@NotNull final User user) {
 		final Optional<User> updatedUserOptional = service.updateUser(user);
-		return updatedUserOptional.isPresent() ?
-				Response.ok(updatedUserOptional.get()).build() :
-				Response.status(Response.Status.NOT_FOUND).build();
+		if (updatedUserOptional.isPresent()) {
+			final User updatedUser = updatedUserOptional.get();
+			updatedUser.setPassword("******");
+			return Response.ok(updatedUser).build();
+		}
+		return Response.status(Response.Status.NOT_FOUND).build();
+	}
+
+	@POST
+	@Path("/login")
+	@Produces("application/json")
+	@Consumes("application/json")
+	public Response login(@NotNull final String usernameAndPassword) {
+		JsonObject usernameAndPasswordArray = Json.createReader(new StringReader(usernameAndPassword)).readObject();
+		final String username = usernameAndPasswordArray.getString("username");
+		final String password = usernameAndPasswordArray.getString("password");
+		UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+		token.setRememberMe(true);
+
+		Subject currentUser = SecurityUtils.getSubject();
+
+		//Authenticate the subject by passing
+		//the user name and password token
+		//into the login method
+		boolean successfulAuth = false;
+		try {
+			currentUser.login(token);
+			successfulAuth = true;
+		} catch  ( UnknownAccountException uae ) {
+			logger.error("Unknown account");
+		} catch  ( IncorrectCredentialsException ice ) {
+			logger.error("Incorrect username/password combination");
+		} catch  ( LockedAccountException lae ) {
+			logger.error("Account is locked. Impossible to authenticate.");
+		} catch  ( ExcessiveAttemptsException eae ) {
+			logger.error("You've reached the maximum number of connection attempts.");
+		} catch ( AuthenticationException ae ) {
+			//unexpected error?
+			logger.error("Authentication error: " + ae.getMessage());
+		}
+
+		// If connection was not successful, sends a Unauthorized response
+		if (!successfulAuth) return Response.status(401).build();
+		return Response.ok(currentUser.getSession()).build();
+	}
+
+	@GET
+	@Path("/isLoggedIn")
+	@Produces("application/json")
+	public Response isLoggedIn() {
+		return Response.ok(SecurityUtils.getSubject().isAuthenticated()).build();
+	}
+
+	@PUT
+	@Path("/add")
+	@Produces("application/json")
+	@Consumes("application/json")
+	public Response addUser(@NotNull final User user) throws URISyntaxException {
+		// Checks if the username is already taken
+		if (service.getUser(user.getUsername()).isPresent())
+			return Response.status(Response.Status.CONFLICT).build();
+		// Verifies for malformed fields
+		if (user.getEmail() == null || user.getUsername() == null || user.getUsername().length() < 2 ||
+				user.getUsername().length() > 35 || user.getPassword() == null || user.getPassword().length() < 2 ||
+				user.getPassword().length() > 1000)
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		// If user doesn't exist and all fields are correct, add it to the database
+		user.setIsConfirmed(false);
+		// Deletes all potential confirmations (since a confirmation must be unique).
+		service.deleteAccountConfirmations(user.getEmail());
+		service.createUser(user);
+		// Creates an account confirmation
+		service.createAccountConfirmation(user).ifPresent(confirmationId ->
+			// Sends the confirmation link by email to the user
+            emailSender.sendRegistrationMail(user.getEmail(), user.getUsername(), confirmationId)
+        );
+		return Response
+				.status(Response.Status.CREATED)
+				.contentLocation(new URI("users/by_id/" + user.getId().toString()))
+				.build();
+	}
+
+	@GET
+	@Path("/confirm")
+	@Produces("application/json")
+	public Response confirmUser(@QueryParam("email") String email, @QueryParam("id") String confirmationId) {
+		List<AccountConfirmation> confirmations = service.findAccountConfirmations(email);
+		if (confirmations.size() > 0 &&
+				confirmations.stream().anyMatch(accountConfirmation ->
+						accountConfirmation.getConfirmationId().equals(confirmationId))) {
+			service.getUserByEmail(email).ifPresent(user -> {
+				user.setIsConfirmed(true);
+				service.updateUser(user);
+			});
+			// Deletes all potential account confirmations since the user was either confirmed or doesn't exist in
+			// database.
+			service.deleteAccountConfirmations(email);
+			return Response.ok().build();
+		}
+		return Response.status(Response.Status.NOT_FOUND).build();
+	}
+
+	@GET
+	@Path("/request_password_reset")
+	@Produces("application/json")
+	public Response requestPasswordReset(@QueryParam("email") String email) {
+		if (service.getUserByEmail(email).isPresent()) {
+			final String requestId = service.createPasswordResetRequest(email);
+			emailSender.sendPasswordResettingEmail(email, requestId);
+			return Response.ok().build();
+		}
+		return Response.status(Response.Status.NOT_FOUND).build();
+	}
+
+	@POST
+	@Path("/reset_password")
+	@Consumes("application/json")
+	@Produces("application/json")
+	public Response resetPassword(@NotNull final String emailAndRequestIdAndPassword) {
+		JsonObject json = Json.createReader(new StringReader(emailAndRequestIdAndPassword)).readObject();
+		final String email = json.getString("email");
+		final String requestId = json.getString("id");
+		final String newPassword = json.getString("password");
+		if (email == null || requestId == null || newPassword == null)
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		List<ResetPasswordRequest> requests = service.findResetPasswordRequests(email);
+		if (requests.size() > 0 && requests.stream().anyMatch(request -> request.getRequestId().equals(requestId))) {
+			service.getUserByEmail(email).ifPresent(user -> service.updatePassword(user, newPassword));
+			service.deletePasswordRequests(email);
+			return Response.ok().build();
+		}
+
+		return Response.status(Response.Status.NOT_FOUND).build();
 	}
 
 	private Response userResponse(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<User> userOptional) {

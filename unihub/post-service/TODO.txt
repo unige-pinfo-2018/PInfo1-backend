@@ -1,0 +1,54 @@
+------methods get informations 
+POSTS
+	nbPost()					[Done]
+	posts /by_id/{id}				[Done]
+	/userId_by_id/{id}				[Done]
+	/parentId_by_id/{id}				[Done]
+	/replytoId_by_id/{id}				[Done]
+	/nbUpvotes_by_id/{idPost}			[Done]
+	/listIdTags_by_id/{idPost}			[Done]
+	/date_by_id/{idPost}				[Done]
+	/content_by_id/{idPost}				[Done]
+	getAllChildrenPost{idPost}			[]
+	getALLReplyToPost(Post)				[]
+	getLatestPost(number,IdTag)			[]
+LIKE
+	/by/{column}/{value}				[Done]
+DISLIKE
+	/by/{column}/{value}				[Done]
+TAGS
+	/by/{column}/{value}				[Done]
+
+
+-----methods put informations 
+POSTS
+	addPost()					[Done]	
+LIKES
+	addLike()					[Done]
+DISLIKES
+	addDislike()					[Done]
+TAGS
+	addDislike()					[Done]
+
+
+
+
+-----methods put informations 
+POSTS
+	update_post()					[Done]
+
+
+
+-----methode to delete 
+	like						[]
+	dislike						[]
+	post						[]
+	tag						[]
+
+
+--creat test						[]
+--faire function json more simply			[]
+Like and Dislike could be childs of UserActionToPost
+
+		
+
