@@ -14,6 +14,9 @@ public class AccountConfirmation implements Serializable {
 
     private static final long serialVersionUID = 5922499249530705338L;
 
+    public AccountConfirmation() {
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")

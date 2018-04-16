@@ -32,8 +32,6 @@ public class UserServiceImpl implements UserService {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	private PasswordService passwordService = new DefaultPasswordService();
-
 	@Override
 	public List<User> getAll() {
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -62,16 +60,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public String encryptPassword(String plainPassword) {
-		return passwordService.encryptPassword(plainPassword);
-	}
-
-	@Override
 	public void createUser(@NotNull User user) {
 		// Id will be created automatically
 		user.setId(null);
-    	final String plainPassword = user.getPassword();
-		user.setPassword(encryptPassword(plainPassword));
 		// Saves the user in DB
 		entityManager.persist(user);
 	}
@@ -110,7 +101,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void updatePassword(User user, String password) {
-		user.setPassword(encryptPassword(password));
+		user.setPassword(password);
 		entityManager.merge(user);
 	}
 

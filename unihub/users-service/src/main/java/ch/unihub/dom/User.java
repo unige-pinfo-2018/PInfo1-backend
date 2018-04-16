@@ -1,5 +1,7 @@
 package ch.unihub.dom;
 
+import ch.unihub.utils.PasswordEncrypter;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -13,7 +15,19 @@ import java.io.Serializable;
 public class User implements Serializable {
 
 	private static final long serialVersionUID = -6146935825517747043L;
-	
+
+	public User() {
+	}
+
+	public User(String username, String password, String email, Role role, Curriculum curriculum, Boolean confirmed) {
+		this.username = username;
+		this.setPassword(password);
+		this.email = email;
+		this.role = role;
+		this.curriculum = curriculum;
+		this.confirmed = confirmed;
+	}
+
 	/** The unique id in a technical sense. */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -102,7 +116,7 @@ public class User implements Serializable {
 	}
 
 	public void setPassword(String password) {
-		this.password = password;
+		this.password = PasswordEncrypter.encryptPassword(password);
 	}
 
 	public Boolean isConfirmed() {

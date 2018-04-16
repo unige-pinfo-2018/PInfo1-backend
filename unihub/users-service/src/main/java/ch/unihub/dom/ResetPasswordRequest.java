@@ -14,6 +14,9 @@ public class ResetPasswordRequest implements Serializable {
 
     private static final long serialVersionUID = 8189638718050542908L;
 
+    public ResetPasswordRequest() {
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")

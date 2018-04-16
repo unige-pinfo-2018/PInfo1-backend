@@ -23,13 +23,6 @@ public interface UserService extends Serializable {
 	List<User> getAll();
 
     /**
-     * Encrypts a password.
-     * @param plainPassword A password in clear.
-     * @return The hashed password.
-     */
-	String encryptPassword(final String plainPassword);
-
-    /**
      * @param username The username of the user to return.
      * @return The {@code User} corresponding to the given username, or an empty optional.
      */

@@ -1,20 +1,12 @@
 [![Build Status](https://api.travis-ci.org/unige-pinfo-2018/PInfo1-backend.svg?branch=master)](https://api.travis-ci.org/unige-pinfo-2018/PInfo1-backend.svg?branch=master)
 
-# unihub-dev
-
-## Build Setup
+Please edit the wildfly/standalone/configuration/standalone.xml in the appserver/wildfly docker to:
 
 ```
-# please clean your docker-related stuff (containers, images, network):
-https://gist.github.com/bastman/5b57ddb3c11942094f8d0a97d461b430
-
-sudo mkdir /opt/docker-deploy
-sudo chmod -R 755 /opt/docker-deploy
-sudo chmod -R a+x /opt/docker-deploy
-sudo chown -R user:user /opt/docker-deploy
-
-cd docker-config
-./runDocker
-cd ..
-mvn clean install
+    <interface name="management">
+        <any-address />
+    </interface>
+    <interface name="public">
+        <any-address />
+    </interface>
 ```
