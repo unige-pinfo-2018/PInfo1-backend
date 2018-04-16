@@ -25,7 +25,6 @@ import java.util.function.Predicate;
 /**
  * @author Arthur Deschamps
  */
-
 @Path("/users")
 public class UserServiceRs {
 	@Inject
