@@ -12,6 +12,12 @@ import org.junit.runner.RunWith;
 
 @RunWith(Arquillian.class)
 public class UserServiceImplTest {
+	@Deployment
+	public static JavaArchive createDeployment() {
+		return ShrinkWrap.create(JavaArchive.class)
+				.addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+	}
+
 	@Test
 	public void test() {
 		

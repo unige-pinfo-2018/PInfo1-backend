@@ -14,7 +14,10 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.shrinkwrap.resolver.api.maven.Maven;
+import org.jboss.shrinkwrap.resolver.api.maven.ScopeType;
 import org.junit.Assert;
 import org.junit.runners.MethodSorters;
 import org.junit.FixMethodOrder;
@@ -28,13 +31,16 @@ import ch.unihub.dom.User;
 public class UserServiceRsTest {	
 	@Deployment
 	public static WebArchive create() {
-		
+		File[] libs = Maven.resolver()
+				.loadPomFromFile("pom.xml").importCompileAndRuntimeDependencies().resolve()
+				.withTransitivity().as(File.class);
 		return ShrinkWrap.create(WebArchive.class, "unihub-integration-test.war").addPackages(true, "ch.unihub")
 				.addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
 				.setWebXML(new File("src/main/webapp/WEB-INF", "/web.xml"))
 				.addAsWebInfResource(new File("src/main/webapp/WEB-INF/ejb-jar.xml"), "ejb-jar.xml")
 				.addAsWebInfResource(new File("src/main/webapp/WEB-INF/jboss-web.xml"), "jboss-web.xml")
-				.addAsResource("test-persistence.xml", "META-INF/persistence.xml");
+				.addAsResource("test-persistence.xml", "META-INF/persistence.xml")
+				.addAsLibraries(libs);
 	}
 
 	@Inject
