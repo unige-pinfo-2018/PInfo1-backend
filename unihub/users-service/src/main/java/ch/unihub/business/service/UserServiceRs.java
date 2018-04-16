@@ -9,6 +9,7 @@ import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ejb.EJBException;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -70,7 +71,7 @@ public class UserServiceRs {
 	public Response deleteUser(@PathParam("id") Long id) {
 		try {
 			service.deleteUser(id);
-		} catch (NotFoundException e) {
+		} catch (NotFoundException | EJBException e) {
 			logger.trace(e.getMessage());
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
@@ -83,7 +84,7 @@ public class UserServiceRs {
 	public Response deleteUser(@PathParam("username") String username) {
 		try {
 			service.deleteUser(username);
-		} catch (NotFoundException e) {
+		} catch (NotFoundException | EJBException e) {
 			logger.trace(e.getMessage());
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}

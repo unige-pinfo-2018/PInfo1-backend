@@ -8,10 +8,12 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.ejb.EJBException;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonReader;
 import javax.json.JsonReaderFactory;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
 import ch.unihub.dom.Curriculum;
@@ -24,10 +26,8 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import org.junit.Assert;
+import org.junit.*;
 import org.junit.runners.MethodSorters;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import ch.unihub.dom.User;
@@ -35,8 +35,6 @@ import ch.unihub.dom.User;
 @RunWith(Arquillian.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class UserServiceRsTest {
-
-	private static final Gson gson = new Gson();
 
 	@Deployment
 	public static WebArchive create() {
@@ -60,6 +58,59 @@ public class UserServiceRsTest {
 	@Inject
 	private UserServiceRs service;
 
+	private static final Gson gson = new Gson();
+
+	private class UsernameAndPassword {
+		public String username;
+		public String password;
+
+		public UsernameAndPassword(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+	}
+
+	private final int BAD_REQUEST = Response.Status.BAD_REQUEST.getStatusCode();
+	private final int NOT_FOUND = Response.Status.NOT_FOUND.getStatusCode();
+	private final int CREATED = Response.Status.CREATED.getStatusCode();
+	private final int NO_CONTENT = Response.Status.NO_CONTENT.getStatusCode();
+	private final int OK = Response.Status.OK.getStatusCode();
+	private final int UNAUTHORIZED = Response.Status.UNAUTHORIZED.getStatusCode();
+
+	private final String fakeUsername = "fakeusername";
+	private final String fakePassword = "fakepassword";
+	private final String fakeEmail = "fakeemail@epfl.ch";
+	private final Role fakeRole = Role.USER;
+	private final Curriculum fakeCurriculum = Curriculum.BACHELOR_STUDENT;
+	private final boolean isFakeUserConfirmed = false;
+	private final User fakeUser = new User(fakeUsername, fakePassword, fakeEmail, fakeRole, fakeCurriculum,
+			isFakeUserConfirmed);
+	private final String fakeUsernameAuthenticated = "fakeusernameauthenticated";
+	private final String fakeEmailAuthenticated = "fakeemailauthenticated@epfl.ch";
+	private final User fakeUserAuthenticated = new User(fakeUsernameAuthenticated, fakePassword, fakeEmailAuthenticated,
+			fakeRole, fakeCurriculum, true);
+
+	@Before
+	public void beforeTest() throws URISyntaxException {
+		service.addUser(fakeUser);
+		service.addUser(fakeUserAuthenticated);
+		fakeUserAuthenticated.setIsConfirmed(true);
+		service.updateUser(fakeUserAuthenticated);
+	}
+
+	@After
+	public void afterTest() {
+		try {
+			service.deleteUser(fakeUsername);
+			service.deleteUser(fakeUsernameAuthenticated);
+		} catch (NotFoundException | EJBException ignored) {}
+
+	}
+
+	private static String generateRandomString() {
+		return UUID.randomUUID().toString().substring(0, 20);
+	}
+
     @Test  
     public void t00_testEntityManagerInjected() {
         assertNotNull(service);
@@ -71,17 +122,17 @@ public class UserServiceRsTest {
     	User user = new User();
     	user.setUsername("username");
     	user.setEmail("email@hotmail.com");
-    	Assert.assertEquals(400, service.addUser(user).getStatus());
+    	Assert.assertEquals(BAD_REQUEST, service.addUser(user).getStatus());
     	// No email
     	user = new User();
     	user.setUsername("username");
     	user.setPassword("password");
-    	Assert.assertEquals(400, service.addUser(user).getStatus());
+    	Assert.assertEquals(BAD_REQUEST, service.addUser(user).getStatus());
     	// No username
 		user = new User();
 		user.setEmail("email@hotmail.com");
 		user.setPassword("password");
-		Assert.assertEquals(400, service.addUser(user).getStatus());
+		Assert.assertEquals(BAD_REQUEST, service.addUser(user).getStatus());
 	}
 
 	@Test
@@ -90,18 +141,22 @@ public class UserServiceRsTest {
 		user.setUsername("username");
 		user.setEmail("email@hotmail.com");
 		user.setPassword("password");
-		Assert.assertEquals(201, service.addUser(user).getStatus());
+		Assert.assertEquals(CREATED, service.addUser(user).getStatus());
+		service.deleteUser(user.getUsername());
 	}
 
 	@Test
-	public void t03_shouldDeleteUserByUsername204() {
-		Assert.assertEquals(204, service.deleteUser("username").getStatus());
+	public void t03_shouldDeleteUserReturn204() throws URISyntaxException {
+		// Delete by username
+		Assert.assertEquals(NO_CONTENT, service.deleteUser(fakeUser.getUsername()).getStatus());
+		service.addUser(fakeUser);
+		// Delete by id
+		Assert.assertEquals(NO_CONTENT, service.deleteUser(fakeUser.getId()).getStatus());
 	}
 
 	@Test
 	public void t04_shouldNbUserReturnAStringWith_nbUser_() {
-		String result = service.getNbUsers();
-		Assert.assertTrue(result.contains("nbUsers"));
+		Assert.assertTrue(service.getNbUsers().contains("nbUsers"));
 	}
 	
 	@Test
@@ -119,77 +174,116 @@ public class UserServiceRsTest {
 		}
 		String result = service.getNbUsers();
 		Map parsed = gson.fromJson(result, Map.class);
-		Assert.assertEquals(new Integer(usernames.length), Integer.valueOf(parsed.get("nbUsers").toString()));
+		// + 2 for the fake users that are created before every test
+		Assert.assertEquals(new Integer(usernames.length + 2), Integer.valueOf(parsed.get("nbUsers").toString()));
 	}
 	
 	@Test
-	public void t06_shouldAddSaveAllFieldsAndEncryptPassword() throws URISyntaxException {
-    	final String username = "JaneDoe";
-    	final String password = "weakpassword";
-    	final String email = "mail@email.com";
-    	final Role role = Role.USER;
-    	final Curriculum curriculum = Curriculum.DOCTOR;
-    	final User user = new User(username, password, email, role, curriculum, null);
-		service.addUser(user);
-		Response result = service.getUser(user.getId());
-		Assert.assertEquals(200, result.getStatus());
+	public void t06_shouldAddSaveAllFieldsAndEncryptPassword() {
+		Response result = service.getUser(fakeUser.getId());
+		Assert.assertEquals(OK, result.getStatus());
 		final User savedUser = (User)result.getEntity();
-		Assert.assertEquals(username, savedUser.getUsername());
+		Assert.assertEquals(fakeUser.getUsername(), savedUser.getUsername());
 		// Password should be encrypted
-		Assert.assertNotEquals(password, savedUser.getPassword());
-		Assert.assertEquals(email, savedUser.getEmail());
-		Assert.assertEquals(role, savedUser.getRole());
-		Assert.assertEquals(curriculum, savedUser.getCurriculum());
+		Assert.assertNotEquals(fakeUser.getPassword(), savedUser.getPassword());
+		Assert.assertEquals(fakeUser.getEmail(), savedUser.getEmail());
+		Assert.assertEquals(fakeUser.getRole(), savedUser.getRole());
+		Assert.assertEquals(fakeUser.getCurriculum(), savedUser.getCurriculum());
 		// Should be unconfirmed
 		Assert.assertEquals(false, savedUser.isConfirmed());
 	}
 	
 	@Test
-	public void t07_shouldUpdateUserReturn200() throws URISyntaxException {
-    	User s = new User();
-    	s.setUsername("Laurent");
-    	s.setPassword("password");
-    	s.setEmail("email@epfl.com");
-    	service.addUser(s);
-		Response result = service.getUser(s.getUsername());
-		s = (User) result.getEntity();
+	public void t07_shouldUpdateUserReturn200() {
 		final String updatedUsername = "William";
-		s.setUsername(updatedUsername);
-		service.updateUser(s);
-		result = service.getUser(s.getId());
-		Assert.assertEquals(200, result.getStatus());
+		fakeUser.setUsername(updatedUsername);
+		service.updateUser(fakeUser);
+		Response result = service.getUser(fakeUser.getId());
+		Assert.assertEquals(OK, result.getStatus());
 		Assert.assertEquals(updatedUsername, ((User) result.getEntity()).getUsername());
 	}
 
 	@Test
-	public void t08_shouldGetUserByEmailReturn200() throws URISyntaxException {
-    	final String email = "arthur@epfl.ch";
-    	final User user = new User();
-    	user.setEmail(email);
-    	Assert.assertEquals(200, service.getUserByEmail(email).getStatus());
+	public void t08_shouldGetUserByEmailReturn200() {
+    	Assert.assertEquals(OK, service.getUserByEmail(fakeEmail).getStatus());
 	}
 
 	@Test
-	public void t09_shouldGetUserByUsernameReturn200() throws URISyntaxException {
-    	final User user = new User();
-    	user.setUsername(UUID.randomUUID().toString().substring(0, 20));
-    	user.setEmail("fakeemail@epfl.ch");
-    	user.setPassword("randompassword");
-    	service.addUser(user);
-    	Assert.assertEquals(200, service.getUser(user.getUsername()).getStatus());
+	public void t09_shouldGetUserByUsernameReturn200() {
+    	Assert.assertEquals(OK, service.getUser(fakeUsername).getStatus());
 	}
 
 	@Test
-	public void t10_shouldGetUserByIdReturn200() throws URISyntaxException {
-    	User user = new User(
-    			UUID.randomUUID().toString().substring(0,20),
-				"password",
-				"arthur.deschamps1208@hotmail.com",
-				null,
-				null,
-				false
+	public void t10_shouldGetUserByIdReturn200() {
+    	Assert.assertEquals(OK, service.getUser(fakeUser.getId()).getStatus());
+	}
+
+	@Test
+	public void t11_shouldGetUserOnNonExistingUserReturn404() {
+    	Assert.assertEquals(
+    			NOT_FOUND,
+				service.getUserByEmail(generateRandomString() + "@epfl.ch").getStatus()
 		);
-    	service.addUser(user);
-    	Assert.assertEquals(200, service.getUser(user.getId()).getStatus());
+    	Assert.assertEquals(
+    			NOT_FOUND,
+				service.getUser(generateRandomString()).getStatus()
+		);
+    	long fakeId = (long) 1e3;
+    	try {
+    		service.deleteUser(fakeId);
+		} catch (EJBException ignored){}
+    	Assert.assertEquals(
+    			NOT_FOUND,
+				service.getUser(fakeId).getStatus()
+		);
+	}
+
+	@Test
+	public void t12_loginShouldSucceedForExistingUser() {
+    	Assert.assertEquals(
+    			OK,
+				service.login(gson.toJson(new UsernameAndPassword(fakeUsernameAuthenticated, fakePassword))).getStatus()
+		);
+	}
+
+	@Test
+	public void t13_loginShouldFailWithWrongUsername() {
+    	Assert.assertEquals(
+    			UNAUTHORIZED,
+				service.login(gson.toJson(new UsernameAndPassword(fakeUsernameAuthenticated + "z", fakePassword))).getStatus()
+		);
+	}
+
+	@Test
+	public void t14_loginShouldFailWithWrongPassword() {
+		Assert.assertEquals(
+				UNAUTHORIZED,
+				service.login(gson.toJson(new UsernameAndPassword(fakeUsernameAuthenticated, fakePassword + "z"))).getStatus()
+		);
+	}
+
+	@Test
+	public void t15_loginShouldFailWithEmail() {
+		Assert.assertEquals(
+				UNAUTHORIZED,
+				service.login(gson.toJson(new UsernameAndPassword(fakeEmailAuthenticated, fakePassword))).getStatus()
+		);
+	}
+
+	@Test
+	public void t16_shouldBeLoggedInAfterLogin() {
+		service.login(gson.toJson(new UsernameAndPassword(fakeEmailAuthenticated, fakePassword)));
+		Response response = service.isLoggedIn();
+		System.out.println(response.getEntity().toString());
+	}
+
+	@Test
+	public void t17_shouldConfirmUserWithRightIdAndEmail() {
+		// TODO
+	}
+
+	@Test
+	public void t18_shouldResetPasswordWithRightIdAndEmail() {
+		// TODO
 	}
 }

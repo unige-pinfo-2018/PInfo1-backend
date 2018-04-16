@@ -26,7 +26,7 @@ public class EmailSender {
             .buildMailer();
 
     @Asynchronous
-    public static void sendRegistrationMail(final String emailAddress, final String username, final String confirmationId) {
+    public void sendRegistrationMail(final String emailAddress, final String username, final String confirmationId) {
         final Email email = EmailBuilder.startingBlank()
                 .from(from, fromAddress)
                 .to(username, emailAddress)
@@ -39,7 +39,7 @@ public class EmailSender {
     }
 
     @Asynchronous
-    public static void sendPasswordResettingEmail(final String emailAddress,
+    public void sendPasswordResettingEmail(final String emailAddress,
                                            final String passwordResetRequestId) {
         final Email email = EmailBuilder.startingBlank()
                 .from(from, fromAddress)
