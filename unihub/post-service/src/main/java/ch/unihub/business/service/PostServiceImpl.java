@@ -1,7 +1,9 @@
 package ch.unihub.business.service;
 
-import java.util.ArrayList;
-import java.util.List;
+import ch.unihub.dom.Dislike;
+import ch.unihub.dom.Like;
+import ch.unihub.dom.Post;
+import ch.unihub.dom.Tag;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -12,16 +14,11 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.NotFoundException;
-import java.util.List;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
-
-import ch.unihub.dom.Post;
-import ch.unihub.dom.Like;
-import ch.unihub.dom.Dislike;
-import ch.unihub.dom.Tag;
 
 @Stateless
 public class PostServiceImpl implements PostService {
@@ -168,14 +165,22 @@ public class PostServiceImpl implements PostService {
 	public Long getUserIdPost(Long id)
 	{
 		Optional<Post> thePost = getPost(id);
-		return thePost.isPresent() ? thePost.get().getUserId() : 0;
+		if (thePost.isPresent()){
+			return thePost.get().getUserId();
+		} else {
+			return Long.parseLong(Integer.toString(0));
+		}
     }
 
 	@Override
 	public Long getParentIdPost(Long id)
 	{
 		Optional<Post> thePost = getPost(id);
-		return thePost.isPresent() ? thePost.get().getParentId() : 0;
+		if (thePost.isPresent()){
+			return thePost.get().getParentId();
+		} else {
+			return Long.parseLong(Integer.toString(0));
+		}
 	}
 
 	@Override

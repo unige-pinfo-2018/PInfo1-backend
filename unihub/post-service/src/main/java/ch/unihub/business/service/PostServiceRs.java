@@ -1,25 +1,17 @@
 package ch.unihub.business.service;
 
+import ch.unihub.dom.Post;
+
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Digits;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
-import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
-import ch.unihub.dom.Post;
 
 @Path("/posts")
 public class PostServiceRs {
@@ -29,7 +21,7 @@ public class PostServiceRs {
 	@GET
 	@Path("/nbPosts")
 	@Produces({ "application/json" })
-	public String getNbUsers() 
+	public String getNbUsers()
 	{
 		return "{\"nbPosts\":\"" + service.getNbPosts() + "\"}";
 	}
@@ -50,6 +42,36 @@ public class PostServiceRs {
         return postResponse(service.getPost(id));
     }
 
+	@GET
+	@Path("/content_by_ids/")
+	@Produces({ "application/json" })
+	public Response getContent(
+			@QueryParam("from") int from,
+			@QueryParam("to") int to) {
+		List<Response> list = new ArrayList<>();
+		for(int i = from; i <= to; i++)
+			list.add(postResponse(service.getPost(Long.parseLong(Integer.toString(i)))));
+		return Response.ok(list).build();
+	}
+
+	@GET
+	@Path("/getCommentsForPost/{idPost}")
+	@Produces({ "application/json" })
+	public Response getCommentsForPost(@PathParam("idPost") Long idPost) {
+		List<Response> list = new ArrayList<>();
+		int nbPosts = service.getNbPosts();
+
+		for(int i = 1; i <= nbPosts; i++) {
+			Long pID = service.getParentIdPost((Long.parseLong(Integer.toString(i))));
+			if (pID != null){
+				Optional<Post> p = service.getPost((Long.parseLong(Integer.toString(i))));
+				if (idPost.longValue() == pID.longValue()){
+					list.add(postResponse(p));
+				}
+			}
+		}
+		return Response.ok(list).build();
+	}
 
     @GET
     @Path("/userId_by_id/{id}")
