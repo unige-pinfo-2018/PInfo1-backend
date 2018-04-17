@@ -21,9 +21,9 @@ public class PostServiceRs {
 	@GET
 	@Path("/nbPosts")
 	@Produces({ "application/json" })
-	public String getNbUsers()
+	public int getNbUsers()
 	{
-		return "{\"nbPosts\":\"" + service.getNbPosts() + "\"}";
+		return service.getNbPosts();
 	}
 	
 	@GET
@@ -149,4 +149,12 @@ public class PostServiceRs {
                 Response.ok(updatedPostOptional.get()).build() :
                 Response.status(Response.Status.NOT_FOUND).build();
     }
+
+    /*return list with id and a score (bigger if the post have similitudes with the post)*/
+	@GET
+	@Path("/searchPost")
+	@Produces({ "application/json" })
+	public List searchPost(@QueryParam("q") String questionUser,@QueryParam("n") int nbPost,@QueryParam("t") List<String> listTags) {
+		return service.searchPost(questionUser,nbPost,listTags);
+	}
 }
