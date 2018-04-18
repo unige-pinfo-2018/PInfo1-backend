@@ -1,27 +1,24 @@
 package ch.unihub.business.service;
 
-import java.util.ArrayList;
-import java.util.List;
+import ch.unihub.dom.Dislike;
+import ch.unihub.dom.Like;
+import ch.unihub.dom.Post;
+import ch.unihub.dom.Tag;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.NotFoundException;
-import java.util.List;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
-
-import ch.unihub.dom.Post;
-import ch.unihub.dom.Like;
-import ch.unihub.dom.Dislike;
-import ch.unihub.dom.Tag;
 
 @Stateless
 public class PostServiceImpl implements PostService {
@@ -168,14 +165,22 @@ public class PostServiceImpl implements PostService {
 	public Long getUserIdPost(Long id)
 	{
 		Optional<Post> thePost = getPost(id);
-		return thePost.isPresent() ? thePost.get().getUserId() : 0;
+		if (thePost.isPresent()){
+			return thePost.get().getUserId();
+		} else {
+			return Long.parseLong(Integer.toString(0));
+		}
     }
 
 	@Override
 	public Long getParentIdPost(Long id)
 	{
 		Optional<Post> thePost = getPost(id);
-		return thePost.isPresent() ? thePost.get().getParentId() : 0;
+		if (thePost.isPresent()){
+			return thePost.get().getParentId();
+		} else {
+			return Long.parseLong(Integer.toString(0));
+		}
 	}
 
 	@Override
@@ -264,5 +269,35 @@ public class PostServiceImpl implements PostService {
         if (!post.isPresent()) return Optional.empty();
         post.get().copyFields(updatedPost);
         return post;
+    }
+
+
+
+    //first do this sql query like in squirrel :
+    //          ALTER TABLE `POSTS` ADD FULLTEXT(`CONTENT`);
+    //example : http://localhost:18080/post-service/rest/posts/searchPost?q=my+question+for+python&n=10&t=info&t=informatique
+    @Override
+    public List searchPost(String QuestionUser, int nbPost,List<String> listTags) {
+
+	    String listTagsSql="";
+	    for (int i=0;i<listTags.size();i++)
+        {
+            listTagsSql=listTagsSql.concat("'");
+            listTagsSql=listTagsSql.concat(listTags.get(i));
+            listTagsSql=listTagsSql.concat("',");
+        }
+        if (listTags.size() == 0)
+        {
+            listTagsSql="'TAGS.NAME' ";
+        }
+
+        listTagsSql=listTagsSql.substring(0, listTagsSql.length() - 1);
+        Query q = entityManager.createNativeQuery(
+                "SELECT POSTS.ID, MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) AS score FROM POSTS " +
+                   "INNER JOIN TAGS ON TAGS.NAME IN ("+listTagsSql+") AND TAGS.POSTID = POSTS.ID " +
+                   "WHERE PARENTID=0 AND REPLYTOID=0 AND MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) > 0 " +
+                   "ORDER BY score DESC LIMIT "+nbPost+";\n");
+
+        return q.getResultList();
     }
 }

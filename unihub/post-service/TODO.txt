@@ -9,9 +9,7 @@ POSTS
 	/listIdTags_by_id/{idPost}			[Done]
 	/date_by_id/{idPost}				[Done]
 	/content_by_id/{idPost}				[Done]
-	getAllChildrenPost{idPost}			[]
-	getALLReplyToPost(Post)				[]
-	getLatestPost(number,IdTag)			[]
+
 LIKE
 	/by/{column}/{value}				[Done]
 DISLIKE
@@ -48,7 +46,14 @@ POSTS
 
 --creat test						[]
 --faire function json more simply			[]
-Like and Dislike could be childs of UserActionToPost
 
+
+
+SEARCHING
+	searchPost(question,numberPosts,List<tag>)	[Done]
+		
+
+
+Like and Dislike could be childs of UserActionToPost
 		
 

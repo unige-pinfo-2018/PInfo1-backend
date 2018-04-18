@@ -1,18 +1,16 @@
 package ch.unihub.business.service;
 
-import java.io.Serializable;
-import java.sql.Timestamp;
-import java.util.List;
-import javax.ejb.Local;
-import javax.validation.constraints.NotNull;
-import java.net.URISyntaxException;
-import java.util.Optional;
-import java.util.Date;
-
 import ch.unihub.dom.Dislike;
 import ch.unihub.dom.Like;
 import ch.unihub.dom.Post;
 import ch.unihub.dom.Tag;
+
+import javax.ejb.Local;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Local
 public interface PostService extends Serializable {
@@ -73,6 +71,5 @@ public interface PostService extends Serializable {
 	//update post
 	Optional<Post> updatePost(final Post updatedPost);
 
-
-
+	List searchPost(String questionUser, int nbPost, List<String> listTags);
 }
