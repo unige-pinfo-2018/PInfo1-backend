@@ -18,9 +18,9 @@ public class PostServiceRs {
 	@GET
 	@Path("/nbPosts")
 	@Produces({ "application/json" })
-	public int getNbUsers()
+	public String getNbUsers()
 	{
-		return service.getNbPosts();
+		return "{\"nbPosts\":\"" + service.getNbPosts() + "\"}";
 	}
 	
 	@GET
@@ -134,7 +134,7 @@ public class PostServiceRs {
 	public String getContent(@PathParam("idPost") Long idPost) {
 		return "{\"content\":\"" + service.getContent(idPost) + "\"}" ;
 	}
-	
+
 	@GET
 	@Path("/listIdTags_by_id/{idPost}")
 	@Produces({ "application/json" })
