@@ -8,10 +8,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Path("/posts")
 public class PostServiceRs {
@@ -60,12 +57,11 @@ public class PostServiceRs {
 	public Response getCommentsForPost(@PathParam("idPost") Long idPost) {
 		List<Response> list = new ArrayList<>();
 		int nbPosts = service.getNbPosts();
-
-		for(int i = 1; i <= nbPosts; i++) {
+		for (int i = 1; i <= nbPosts; i++) {
 			Long pID = service.getParentIdPost((Long.parseLong(Integer.toString(i))));
-			if (pID != null){
+			if (pID != null) {
 				Optional<Post> p = service.getPost((Long.parseLong(Integer.toString(i))));
-				if (idPost.longValue() == pID.longValue()){
+				if (idPost.longValue() == pID.longValue()) {
 					list.add(postResponse(p));
 				}
 			}
@@ -73,6 +69,30 @@ public class PostServiceRs {
 		return Response.ok(list).build();
 	}
 
+	@GET
+	@Path("/getCommentsForPosts/")
+	@Produces({ "application/json" })
+	public Response getCommentsForPosts(
+			@QueryParam("from") int from,
+			@QueryParam("to") int to) {
+		HashMap<Integer, List<Post>> commentsForAllPosts = new HashMap<>();
+		int nbPosts = service.getNbPosts();
+		for(int i = from; i <= to; i++){
+			List<Post> list = new ArrayList<>();
+			for (int j = 1; j <= nbPosts; j++) {
+				Long pID = service.getParentIdPost((Long.parseLong(Integer.toString(j))));
+				if (pID != null) {
+					Optional<Post> p = service.getPost((Long.parseLong(Integer.toString(j))));
+					if (Long.parseLong(Integer.toString(i)) == pID) {
+						p.ifPresent(list::add);
+					}
+				}
+			}
+			commentsForAllPosts.put(i, list);
+		}
+		return Response.ok(commentsForAllPosts).build();
+	}
+	
     @GET
     @Path("/userId_by_id/{id}")
     @Produces({ "application/json" })
