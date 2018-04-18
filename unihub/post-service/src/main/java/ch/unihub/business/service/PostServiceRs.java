@@ -5,13 +5,6 @@ import ch.unihub.dom.Post;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Optional;
-
-import ch.unihub.dom.Post;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -142,18 +135,6 @@ public class PostServiceRs {
 		return "{\"content\":\"" + service.getContent(idPost) + "\"}" ;
 	}
 	
-	@GET
-	@Path("/content_by_ids/")
-	@Produces({ "application/json" })
-	public Response getContent(
-			@QueryParam("from") int from,
-			@QueryParam("to") int to) {
-		List<Response> list = new ArrayList<Response>();
-		for(int i = to; i <= from; i++)
-			list.add(postResponse(service.getPost((long)i)));
-		return Response.ok(list).build();
-	}
-
 	@GET
 	@Path("/listIdTags_by_id/{idPost}")
 	@Produces({ "application/json" })
