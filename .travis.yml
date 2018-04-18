@@ -1,6 +1,6 @@
 language: java
 before_install:
-	- cd unihub/docker-config
-	- ./runDocker.sh
-	- cd ..
+  - cd unihub/docker-config
+  - ./runDocker.sh
+  - cd ..
 install: mvn clean install
