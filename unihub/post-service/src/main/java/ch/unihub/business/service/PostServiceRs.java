@@ -20,7 +20,14 @@ public class PostServiceRs {
 	@Produces({ "application/json" })
 	public String getNbUsers()
 	{
-		return "{\"nbPosts\":\"" + service.getNbPosts() + "\"}";
+		int n = service.getNbPosts();
+		int nbPostNotComment = 0;
+		for (int i=1; i<=n; i++){
+			if (service.getPost(Long.parseLong(Integer.toString(i))).get().getParentId() == null){
+				nbPostNotComment+=1;
+			}
+		}
+		return "{\"nbPosts\":\"" + nbPostNotComment + "\"}";
 	}
 	
 	@GET
@@ -47,7 +54,11 @@ public class PostServiceRs {
 			@QueryParam("to") int to) {
 		List<Response> list = new ArrayList<>();
 		for(int i = from; i <= to; i++)
-			list.add(postResponse(service.getPost(Long.parseLong(Integer.toString(i)))));
+			if (service.getPost(Long.parseLong(Integer.toString(i))).get().getParentId() != null && to<service.getNbPosts()){
+				to+=1;
+			} else {
+				list.add(postResponse(service.getPost(Long.parseLong(Integer.toString(i)))));
+			}
 		return Response.ok(list).build();
 	}
 
@@ -78,17 +89,21 @@ public class PostServiceRs {
 		HashMap<Integer, List<Post>> commentsForAllPosts = new HashMap<>();
 		int nbPosts = service.getNbPosts();
 		for(int i = from; i <= to; i++){
-			List<Post> list = new ArrayList<>();
-			for (int j = 1; j <= nbPosts; j++) {
-				Long pID = service.getParentIdPost((Long.parseLong(Integer.toString(j))));
-				if (pID != null) {
-					Optional<Post> p = service.getPost((Long.parseLong(Integer.toString(j))));
-					if (Long.parseLong(Integer.toString(i)) == pID) {
-						p.ifPresent(list::add);
+			if (service.getPost(Long.parseLong(Integer.toString(i))).get().getParentId() != null && to<service.getNbPosts()){
+				to+=1;
+			} else {
+				List<Post> list = new ArrayList<>();
+				for (int j = 1; j <= nbPosts; j++) {
+					Long pID = service.getParentIdPost((Long.parseLong(Integer.toString(j))));
+					if (pID != null) {
+						Optional<Post> p = service.getPost((Long.parseLong(Integer.toString(j))));
+						if (Long.parseLong(Integer.toString(i)) == pID) {
+							p.ifPresent(list::add);
+						}
 					}
 				}
+				commentsForAllPosts.put(i, list);
 			}
-			commentsForAllPosts.put(i, list);
 		}
 		return Response.ok(commentsForAllPosts).build();
 	}
