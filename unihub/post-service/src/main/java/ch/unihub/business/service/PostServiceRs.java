@@ -192,4 +192,12 @@ public class PostServiceRs {
 	public List searchPost(@QueryParam("q") String questionUser,@QueryParam("n") int nbPost,@QueryParam("t") List<String> listTags) {
 		return service.searchPost(questionUser,nbPost,listTags);
 	}
+
+	@GET
+	@Path("/posts_by_ids")
+	@Produces({ "application/json" })
+	public List getPostsByIds(@QueryParam("id") List<Long> listId) {
+		return service.getPostsByIds(listId);
+	}
+
 }

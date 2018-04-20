@@ -298,4 +298,21 @@ public class PostServiceImpl implements PostService {
 
         return q.getResultList();
     }
+
+    @Override
+    public List getPostsByIds(List<Long> listId)
+    {
+        String listIdSQL=" ";
+        for (int i=0;i<listId.size();i++)
+        {
+            listIdSQL=listIdSQL.concat(String.valueOf(listId.get(i)));
+            listIdSQL=listIdSQL.concat(",");
+        }
+        listIdSQL=listIdSQL.substring(0, listIdSQL.length() - 1);
+        Query q = entityManager.createNativeQuery(
+                "SELECT * FROM POSTS WHERE ID IN ("+listIdSQL+") ORDER BY FIELD(id,"+listIdSQL+");");
+        return q.getResultList();
+
+    }
+
 }
