@@ -302,6 +302,9 @@ public class PostServiceImpl implements PostService {
     @Override
     public List getPostsByIds(List<Long> listId)
     {
+        //i've two different way to have the list, so theo can choose the best for him
+
+        /*
         String listIdSQL=" ";
         for (int i=0;i<listId.size();i++)
         {
@@ -311,8 +314,35 @@ public class PostServiceImpl implements PostService {
         listIdSQL=listIdSQL.substring(0, listIdSQL.length() - 1);
         Query q = entityManager.createNativeQuery(
                 "SELECT * FROM POSTS WHERE ID IN ("+listIdSQL+") ORDER BY FIELD(id,"+listIdSQL+");");
-        return q.getResultList();
+        return q.getResultList();*/
 
+        CriteriaBuilder qb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Post> cq = qb.createQuery(Post.class);
+
+        Root<Post> root = cq.from(Post.class);
+        Expression<String> parentExpression = root.get("id");
+        Predicate idCond = parentExpression.in(listId);
+        cq.where(idCond);
+
+        TypedQuery<Post> query = entityManager.createQuery(cq);
+        List<Post> results = query.getResultList();
+        return results;
+    }
+
+    @Override
+    public List<Post> getPostsOfUser(Long idUser)
+    {
+        CriteriaBuilder qb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Post> cq = qb.createQuery(Post.class);
+
+        Root<Post> root = cq.from(Post.class);
+        Predicate idCond = qb.equal(root.get("userId"), idUser);
+        Predicate idCond2 = qb.isNull(root.get("parentId"));
+        cq.where(idCond,idCond2);
+
+        TypedQuery<Post> query = entityManager.createQuery(cq);
+        List<Post> results = query.getResultList();
+        return results;
     }
 
 }

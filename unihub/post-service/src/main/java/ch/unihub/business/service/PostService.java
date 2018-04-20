@@ -71,4 +71,6 @@ public interface PostService extends Serializable {
 	List searchPost(String questionUser, int nbPost, List<String> listTags);
 
 	List getPostsByIds(List<Long> listId);
+
+    List<Post> getPostsOfUser(Long idUser);
 }

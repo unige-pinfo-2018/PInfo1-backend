@@ -199,5 +199,11 @@ public class PostServiceRs {
 	public List getPostsByIds(@QueryParam("id") List<Long> listId) {
 		return service.getPostsByIds(listId);
 	}
+	@GET
+    @Path("/getPostsOfUser/{idUser}")
+    @Produces({ "application/json" })
+    public List<Post> getPostsOfUser(@PathParam("idUser") Long idUser) {
+        return service.getPostsOfUser(idUser);
+    }
 
 }
