@@ -1,27 +1,26 @@
 package ch.unihub.business.service;
 
-import java.util.ArrayList;
-import java.util.List;
+import ch.unihub.dom.Dislike;
+import ch.unihub.dom.Like;
+import ch.unihub.dom.Post;
+import ch.unihub.dom.Tag;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.NotFoundException;
-import java.util.List;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
-
-import ch.unihub.dom.Post;
-import ch.unihub.dom.Like;
-import ch.unihub.dom.Dislike;
-import ch.unihub.dom.Tag;
 
 @Stateless
 public class PostServiceImpl implements PostService {
@@ -30,7 +29,7 @@ public class PostServiceImpl implements PostService {
 
 	@PersistenceContext
 	private EntityManager entityManager;
-	
+
 	@Override
 	public List<Post> getAll() {
 		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
@@ -42,12 +41,12 @@ public class PostServiceImpl implements PostService {
 		TypedQuery<Post> query = entityManager.createQuery(c);
 		return query.getResultList();
 	}
-	
+
 	@Override
 	public int getNbPosts() {
 		return getAll().size();
 	}
-	
+
 	@Override
 	public Optional<Post> getPost(Long id)
 	{
@@ -101,15 +100,12 @@ public class PostServiceImpl implements PostService {
 
 		Root<Tag> root = cq.from(Tag.class);
 		Predicate idCond;
-		if (columnId.equals("name"))
-		{
-			idCond = qb.equal(root.get(columnId), value);
-		}
-		else
-		{
-			Long valueLong = Long.valueOf(value).longValue();
-			idCond = qb.equal(root.get(columnId), valueLong);
-		}
+
+		if (columnId.equals("name")) {
+			idCond = qb.equal(root.get(columnId), value); }
+		else {
+			idCond = qb.equal(root.get(columnId), Long.valueOf(value).longValue()); }
+
 		cq.where(idCond);
 
 		TypedQuery<Tag> query = entityManager.createQuery(cq);
@@ -146,36 +142,27 @@ public class PostServiceImpl implements PostService {
 		newTag.setId(null);
 		entityManager.persist(newTag);
 	}
-	
-	public Long getNextPostId() {
-		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> c = qb.createQuery(Long.class);
-		Root<Post> from = c.from(Post.class);
-		c.select(qb.max(from.get("id")));		
-		TypedQuery<Long> query = entityManager.createQuery(c);
-		System.out.println(query);
-		
-		Long nb = query.getSingleResult(); 
-		long firstId=0;
-		if (nb == null) {
-			return firstId;
-		} else {
-			return nb + 1;
-		}
-	}
 
 	@Override
 	public Long getUserIdPost(Long id)
 	{
 		Optional<Post> thePost = getPost(id);
-		return thePost.isPresent() ? thePost.get().getUserId() : 0;
+		if (thePost.isPresent()){
+			return thePost.get().getUserId();
+		} else {
+			return Long.parseLong(Integer.toString(0));
+		}
     }
 
 	@Override
 	public Long getParentIdPost(Long id)
 	{
 		Optional<Post> thePost = getPost(id);
-		return thePost.isPresent() ? thePost.get().getParentId() : 0;
+		if (thePost.isPresent()){
+			return thePost.get().getParentId();
+		} else {
+			return Long.parseLong(Integer.toString(0));
+		}
 	}
 
 	@Override
@@ -189,7 +176,6 @@ public class PostServiceImpl implements PostService {
 	public Long getNbUpvotes(Long idPost)
 	{
 		//get likes
-		long nbUpvotes=0;
 		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Like> cq = qb.createQuery(Like.class);
 
@@ -198,7 +184,7 @@ public class PostServiceImpl implements PostService {
 		cq.where(idCond);
 
 		TypedQuery<Like> query = entityManager.createQuery(cq);
-		nbUpvotes = query.getResultList().size();
+		long nbUpvotes = query.getResultList().size();
 
 		//get dislikes/
 		CriteriaQuery<Dislike> cq2 = qb.createQuery(Dislike.class);
@@ -264,5 +250,52 @@ public class PostServiceImpl implements PostService {
         if (!post.isPresent()) return Optional.empty();
         post.get().copyFields(updatedPost);
         return post;
+    }
+
+
+
+    //              !!!!!       first do this sql query like in squirrel :          !!!!!
+    //          ALTER TABLE `POSTS` ADD FULLTEXT(`CONTENT`);
+    //example : http://localhost:18080/post-service/rest/posts/searchPost?q=my+question+for+python&n=10&t=info&t=informatique
+    // even if you dont have a question :
+    //example : http://localhost:18080/post-service/rest/posts/searchPost?n=4&t=info&t=tag2
+    @Override
+    public List searchPost(String QuestionUser, int nbPost,List<String> listTags) {
+
+        String listTagsSql= "INNER JOIN TAGS ON TAGS.NAME IN (";
+	    for (int i=0;i<listTags.size();i++)
+        {
+            listTagsSql=listTagsSql.concat("'");
+            listTagsSql=listTagsSql.concat(listTags.get(i));
+            listTagsSql=listTagsSql.concat("',");
+        }
+        listTagsSql=listTagsSql.substring(0, listTagsSql.length() - 1);
+        listTagsSql=listTagsSql.concat(") AND TAGS.POSTID = POSTS.ID ");
+        if (listTags.size() == 0)
+        {
+            listTagsSql=" ";
+        }
+
+        String MatchQuestionSql;
+        String MatchQuestionSql2;
+        if (QuestionUser == null)
+        {
+            MatchQuestionSql =" FROM POSTS ";
+            MatchQuestionSql2 ="ORDER BY POSTS.ID DESC LIMIT "+nbPost+";\n";
+        }
+        else {
+            MatchQuestionSql= ", MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) AS score FROM POSTS ";
+            MatchQuestionSql2 = "AND MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) > 0 ORDER BY score DESC LIMIT "+nbPost+";\n";
+
+        }
+
+        Query q = entityManager.createNativeQuery(
+                "SELECT DISTINCT POSTS.ID" +
+                   MatchQuestionSql+
+                   listTagsSql+
+                   "WHERE PARENTID IS NULL AND REPLYTOID IS NULL "+
+                   MatchQuestionSql2);
+
+        return q.getResultList();
     }
 }

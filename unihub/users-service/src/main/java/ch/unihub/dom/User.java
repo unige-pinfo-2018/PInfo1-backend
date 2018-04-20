@@ -40,6 +40,10 @@ public class User implements Serializable {
 	@Column(name = "USERNAME")
 	private String username;
 
+	@Size(max = 255)
+	@Column(name = "NAME")
+	private String name;
+
 	// Still required to be able to send the password in a JSON from the client.
 	// Not saved in db.
 	@NotNull
@@ -59,6 +63,10 @@ public class User implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private Curriculum curriculum;
 
+	@Size(max = 2083)
+	@Column(name = "PICTURE_URL")
+	private String pictureUrl;
+
 	@Column(name = "CONFIRMED")
 	private Boolean confirmed;
 
@@ -77,6 +85,10 @@ public class User implements Serializable {
 			this.setIsConfirmed(user.isConfirmed());
 		if (user.getCurriculum() != null)
 			this.setCurriculum(user.getCurriculum());
+		if (user.getName() != null)
+			this.setName(user.getName());
+		if (user.getPictureUrl() != null)
+			this.setPictureUrl(user.getPictureUrl());
 	}
 
 	public final Long getId() {
@@ -116,7 +128,10 @@ public class User implements Serializable {
 	}
 
 	public void setPassword(String password) {
-		this.password = PasswordEncrypter.encryptPassword(password);
+		if (password == null || password.length() == 0)
+			this.password = "";
+		else
+			this.password = PasswordEncrypter.encryptPassword(password);
 	}
 
 	public Boolean isConfirmed() {
@@ -133,5 +148,21 @@ public class User implements Serializable {
 
 	public void setCurriculum(Curriculum curriculum) {
 		this.curriculum = curriculum;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPictureUrl() {
+		return pictureUrl;
+	}
+
+	public void setPictureUrl(String pictureUrl) {
+		this.pictureUrl = pictureUrl;
 	}
 }

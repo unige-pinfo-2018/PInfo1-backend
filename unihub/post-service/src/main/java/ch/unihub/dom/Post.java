@@ -1,18 +1,10 @@
 package ch.unihub.dom;
 
-import java.io.Serializable;
-import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import java.sql.Timestamp;
+import java.io.Serializable;
+import java.util.Date;
 
 
 @Entity
@@ -33,12 +25,10 @@ public class Post implements Serializable {
 	private Long userId;
 	
 	/** The parenting post */
-	@NotNull
 	@Column(name = "PARENTID")
 	private Long parentId;
 
-	/** The creater of the post */
-	@NotNull
+	/** Replying to */
 	@Column(name = "REPLYTOID")
 	private Long replyToId;
 

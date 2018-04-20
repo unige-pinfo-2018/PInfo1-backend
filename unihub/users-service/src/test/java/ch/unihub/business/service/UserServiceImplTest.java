@@ -23,4 +23,9 @@ public class UserServiceImplTest {
 		
 	}
 
+	@Test
+	public void test2() {
+		
+	}
+
 }

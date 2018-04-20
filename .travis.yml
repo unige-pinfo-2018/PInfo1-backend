@@ -1,2 +1,7 @@
 language: java
-install: "cd unihub && mvn clean install"
+before_install:
+  - mkdir /opt/docker-deploy
+  - cd unihub/docker-config
+  - ./runDocker.sh
+  - cd ..
+install: mvn clean install

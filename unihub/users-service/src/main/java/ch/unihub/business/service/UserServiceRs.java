@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import javax.ejb.EJBException;
 import javax.inject.Inject;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
@@ -19,7 +20,9 @@ import javax.ws.rs.core.Response;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -55,6 +58,24 @@ public class UserServiceRs {
 	@Produces({ "application/json" })
 	public Response getUser(@PathParam("id") Long id) {
 		return userResponse(service.getUser(id));
+	}
+
+	@POST
+	@Path("/by_ids")
+	@Produces("application/json")
+	@Consumes("application/json")
+	public Response getUsersByIds(@NotNull final String ids) {
+		final JsonArray userIds = Json.createReader(new StringReader(ids)).readObject().getJsonArray("ids");
+		return Response.ok(
+				userIds
+						.stream()
+						.map(id -> service.getUser(Long.valueOf(id.toString())).orElse(null))
+						// Discards null objects
+						.filter(Objects::nonNull)
+						// Hides passwords
+						.peek(user -> user.setPassword(null))
+						.toArray()
+		).build();
 	}
 
 	@GET
@@ -98,7 +119,7 @@ public class UserServiceRs {
 		final Optional<User> updatedUserOptional = service.updateUser(user);
 		if (updatedUserOptional.isPresent()) {
 			final User updatedUser = updatedUserOptional.get();
-			updatedUser.setPassword("******");
+			updatedUser.setPassword(null);
 			return Response.ok(updatedUser).build();
 		}
 		return Response.status(Response.Status.NOT_FOUND).build();
@@ -234,7 +255,7 @@ public class UserServiceRs {
 	private Response userResponse(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<User> userOptional) {
 		if (userOptional.isPresent()) {
 			final User user = userOptional.get();
-			user.setPassword("*****");
+			user.setPassword(null);
 			return Response.ok().entity(user).build();
 		} else return Response.status(Response.Status.NOT_FOUND).build();
 	}
