@@ -65,9 +65,6 @@ public interface PostService extends Serializable {
     //add tag
     void addTag(@NotNull final Tag tag);
 
-	//get the next id
-	public Long getNextPostId();
-
 	//update post
 	Optional<Post> updatePost(final Post updatedPost);
 
