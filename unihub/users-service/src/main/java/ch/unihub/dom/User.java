@@ -128,7 +128,10 @@ public class User implements Serializable {
 	}
 
 	public void setPassword(String password) {
-		this.password = PasswordEncrypter.encryptPassword(password);
+		if (password == null || password.length() == 0)
+			this.password = "";
+		else
+			this.password = PasswordEncrypter.encryptPassword(password);
 	}
 
 	public Boolean isConfirmed() {
