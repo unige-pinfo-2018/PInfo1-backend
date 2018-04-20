@@ -290,7 +290,7 @@ public class PostServiceImpl implements PostService {
         }
 
         Query q = entityManager.createNativeQuery(
-                "SELECT POSTS.ID" +
+                "SELECT DISTINCT POSTS.ID" +
                    MatchQuestionSql+
                    listTagsSql+
                    "WHERE PARENTID IS NULL AND REPLYTOID IS NULL "+
