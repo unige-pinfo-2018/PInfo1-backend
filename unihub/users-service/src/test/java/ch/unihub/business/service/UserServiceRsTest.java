@@ -86,12 +86,6 @@ public class UserServiceRsTest {
 		public Ids(long[] ids) {
 			this.ids = ids;
 		}
-		public long[] getIds() {
-			return ids;
-		}
-		public void setIds(long[] ids) {
-			this.ids = ids;
-		}
 	}
 
 	private final int BAD_REQUEST = Response.Status.BAD_REQUEST.getStatusCode();
@@ -295,9 +289,16 @@ public class UserServiceRsTest {
 
 	@Test
 	public void t16_shouldBeLoggedInAfterLogin() {
-		restService.login(gson.toJson(new UsernameAndPassword(fakeEmailAuthenticated, fakePassword)));
-		Response response = restService.isLoggedIn();
-		Assert.assertEquals(OK, response.getStatus());
+		Assert.assertEquals(
+				OK,
+				restService.login(gson.toJson(new UsernameAndPassword(fakeUsernameAuthenticated, fakePassword))).getStatus()
+		);
+		// tries two times
+		for (int i = 0; i < 2; i++) {
+			Response response = restService.isLoggedIn();
+			Assert.assertEquals(OK, response.getStatus());
+			Assert.assertTrue((boolean) response.getEntity());
+		}
 	}
 
 	@Test
