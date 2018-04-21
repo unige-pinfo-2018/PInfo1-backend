@@ -345,4 +345,28 @@ public class PostServiceImpl implements PostService {
         return results;
     }
 
+    @Override
+    public List getCommentsByQuestionID(List<Long> parentIds)
+    {
+        List list = new ArrayList<>();
+
+        //listTags.get(i));
+        CriteriaBuilder qb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Post> cq = qb.createQuery(Post.class);
+        Root<Post> root = cq.from(Post.class);
+        Predicate idCond;
+        TypedQuery<Post> query;
+        List<Post> results;
+        for (int i=0;i<parentIds.size();i++) {
+
+            idCond = qb.equal(root.get("parentId"), parentIds.get(i));
+            cq.where(idCond);
+            cq.orderBy(qb.desc(root.get("id")));
+            query = entityManager.createQuery(cq);
+            results = query.getResultList();
+            list.add(results);
+        }
+        return list;
+    }
+
 }

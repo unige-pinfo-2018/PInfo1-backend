@@ -206,4 +206,11 @@ public class PostServiceRs {
         return service.getPostsOfUser(idUser);
     }
 
+    //List<Post> getCommentsByID(long parentId)
+    @GET
+    @Path("/getComments_by_questionID")
+    @Produces({ "application/json" })
+    public List getCommentsByQuestionID(@QueryParam("id") List<Long> listIds) {
+        return service.getCommentsByQuestionID(listIds);
+    }
 }
