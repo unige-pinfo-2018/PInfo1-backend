@@ -199,6 +199,21 @@ public class PostServiceRs {
 	public List getPostsByIds(@QueryParam("id") List<Long> listId) {
 		return service.getPostsByIds(listId);
 	}
+
+	@GET
+	@Path("/posts_and_comments_by_tags")
+	@Produces({"application/json"})
+	public List getPostsAndCommentsByTags(@QueryParam("q") String questionUser,@QueryParam("n") int nbPost,@QueryParam("t") List<String> listTags) {
+		return service.getPostsAndCommentsByTags(questionUser,nbPost,listTags);
+	}
+
+	@GET
+	@Path("/posts_and_comments_by_ids")
+	@Produces({"application/json"})
+	public List getPostsAndCommentsByIds(@QueryParam("id") List<Long> listIds) {
+		return service.getPostsAndCommentsByIds(listIds);
+	}
+
 	@GET
     @Path("/getPostsOfUser/{idUser}")
     @Produces({ "application/json" })

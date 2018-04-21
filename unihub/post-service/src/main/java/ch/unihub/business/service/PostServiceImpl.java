@@ -17,10 +17,7 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Stateless
 public class PostServiceImpl implements PostService {
@@ -368,5 +365,24 @@ public class PostServiceImpl implements PostService {
         }
         return list;
     }
+
+    @Override
+	public List getPostsAndCommentsByTags(String QuestionUser, int nbPost,List<String> listTags) {
+		List postToFetch = searchPost(QuestionUser, nbPost, listTags);
+		List list = new ArrayList();
+		if (!postToFetch.isEmpty()) {
+			list.add(getPostsByIds(postToFetch));
+			list.add(getCommentsByQuestionID(postToFetch));
+		}
+		return list;
+	}
+
+	@Override
+	public List getPostsAndCommentsByIds(List<Long> listIds) {
+		List list = new ArrayList();
+		list.add(getPostsByIds(listIds));
+		list.add(getCommentsByQuestionID(listIds));
+		return list;
+	}
 
 }

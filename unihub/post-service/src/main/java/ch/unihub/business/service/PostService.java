@@ -76,4 +76,8 @@ public interface PostService extends Serializable {
 
     //getCommentsByID : retourne tous les comments pour un id de post donné (donc un select * where parentID = id)
     List getCommentsByQuestionID(List<Long> parentId);
+
+    List getPostsAndCommentsByTags(String questionUser, int nbPost, List<String> listTags);
+
+	List getPostsAndCommentsByIds(List<Long> listIds);
 }
