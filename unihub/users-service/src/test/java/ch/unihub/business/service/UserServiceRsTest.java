@@ -1,25 +1,25 @@
 package ch.unihub.business.service;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.lang.reflect.Array;
+import java.io.Serializable;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.ejb.EJBException;
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonReader;
-import javax.json.JsonReaderFactory;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
-import ch.unihub.dom.Curriculum;
-import ch.unihub.dom.Role;
-import ch.unihub.utils.PasswordEncrypter;
+import ch.unihub.dom.*;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -29,8 +29,6 @@ import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.*;
 import org.junit.runners.MethodSorters;
 import org.junit.runner.RunWith;
-
-import ch.unihub.dom.User;
 
 @RunWith(Arquillian.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -56,8 +54,9 @@ public class UserServiceRsTest {
 	}
 
 	@Inject
-	private UserServiceRs service;
-
+	private UserServiceRs restService;
+	@Inject
+	private UserService userService;
 	private static final Gson gson = new Gson();
 
 	private class UsernameAndPassword {
@@ -67,6 +66,31 @@ public class UserServiceRsTest {
 		public UsernameAndPassword(String username, String password) {
 			this.username = username;
 			this.password = password;
+		}
+	}
+
+	private class EmailAndRequestIdAndPassword {
+		public String email;
+		public String id;
+		public String password;
+
+		public EmailAndRequestIdAndPassword(String email, String id, String password) {
+			this.email = email;
+			this.id = id;
+			this.password = password;
+		}
+	}
+
+	private class Ids {
+		public long[] ids;
+		public Ids(long[] ids) {
+			this.ids = ids;
+		}
+		public long[] getIds() {
+			return ids;
+		}
+		public void setIds(long[] ids) {
+			this.ids = ids;
 		}
 	}
 
@@ -82,9 +106,8 @@ public class UserServiceRsTest {
 	private final String fakeEmail = "fakeemail@epfl.ch";
 	private final Role fakeRole = Role.USER;
 	private final Curriculum fakeCurriculum = Curriculum.BACHELOR_STUDENT;
-	private final boolean isFakeUserConfirmed = false;
 	private final User fakeUser = new User(fakeUsername, fakePassword, fakeEmail, fakeRole, fakeCurriculum,
-			isFakeUserConfirmed);
+			false);
 	private final String fakeUsernameAuthenticated = "fakeusernameauthenticated";
 	private final String fakeEmailAuthenticated = "fakeemailauthenticated@epfl.ch";
 	private final User fakeUserAuthenticated = new User(fakeUsernameAuthenticated, fakePassword, fakeEmailAuthenticated,
@@ -92,17 +115,17 @@ public class UserServiceRsTest {
 
 	@Before
 	public void beforeTest() throws URISyntaxException {
-		service.addUser(fakeUser);
-		service.addUser(fakeUserAuthenticated);
+		restService.addUser(fakeUser);
+		restService.addUser(fakeUserAuthenticated);
 		fakeUserAuthenticated.setIsConfirmed(true);
-		service.updateUser(fakeUserAuthenticated);
+		restService.updateUser(fakeUserAuthenticated);
 	}
 
 	@After
 	public void afterTest() {
 		try {
-			service.deleteUser(fakeUsername);
-			service.deleteUser(fakeUsernameAuthenticated);
+			restService.deleteUser(fakeUsername);
+			restService.deleteUser(fakeUsernameAuthenticated);
 		} catch (NotFoundException | EJBException ignored) {}
 
 	}
@@ -113,7 +136,7 @@ public class UserServiceRsTest {
 
     @Test  
     public void t00_testEntityManagerInjected() {
-        assertNotNull(service);
+        assertNotNull(restService);
     }
 
 	@Test
@@ -122,17 +145,17 @@ public class UserServiceRsTest {
     	User user = new User();
     	user.setUsername("username");
     	user.setEmail("email@hotmail.com");
-    	Assert.assertEquals(BAD_REQUEST, service.addUser(user).getStatus());
+    	Assert.assertEquals(BAD_REQUEST, restService.addUser(user).getStatus());
     	// No email
     	user = new User();
     	user.setUsername("username");
     	user.setPassword("password");
-    	Assert.assertEquals(BAD_REQUEST, service.addUser(user).getStatus());
+    	Assert.assertEquals(BAD_REQUEST, restService.addUser(user).getStatus());
     	// No username
 		user = new User();
 		user.setEmail("email@hotmail.com");
 		user.setPassword("password");
-		Assert.assertEquals(BAD_REQUEST, service.addUser(user).getStatus());
+		Assert.assertEquals(BAD_REQUEST, restService.addUser(user).getStatus());
 	}
 
 	@Test
@@ -141,22 +164,22 @@ public class UserServiceRsTest {
 		user.setUsername("username");
 		user.setEmail("email@hotmail.com");
 		user.setPassword("password");
-		Assert.assertEquals(CREATED, service.addUser(user).getStatus());
-		service.deleteUser(user.getUsername());
+		Assert.assertEquals(CREATED, restService.addUser(user).getStatus());
+		restService.deleteUser(user.getUsername());
 	}
 
 	@Test
 	public void t03_shouldDeleteUserReturn204() throws URISyntaxException {
 		// Delete by username
-		Assert.assertEquals(NO_CONTENT, service.deleteUser(fakeUser.getUsername()).getStatus());
-		service.addUser(fakeUser);
+		Assert.assertEquals(NO_CONTENT, restService.deleteUser(fakeUser.getUsername()).getStatus());
+		restService.addUser(fakeUser);
 		// Delete by id
-		Assert.assertEquals(NO_CONTENT, service.deleteUser(fakeUser.getId()).getStatus());
+		Assert.assertEquals(NO_CONTENT, restService.deleteUser(fakeUser.getId()).getStatus());
 	}
 
 	@Test
 	public void t04_shouldNbUserReturnAStringWith_nbUser_() {
-		Assert.assertTrue(service.getNbUsers().contains("nbUsers"));
+		Assert.assertTrue(restService.getNbUsers().contains("nbUsers"));
 	}
 	
 	@Test
@@ -170,9 +193,9 @@ public class UserServiceRsTest {
 			user.setUsername(usernames[i]);
 			user.setPassword(password);
 			user.setEmail(emails[i]);
-			service.addUser(user);
+			restService.addUser(user);
 		}
-		String result = service.getNbUsers();
+		String result = restService.getNbUsers();
 		Map parsed = gson.fromJson(result, Map.class);
 		// + 2 for the fake users that are created before every test
 		Assert.assertEquals(new Integer(usernames.length + 2), Integer.valueOf(parsed.get("nbUsers").toString()));
@@ -180,7 +203,7 @@ public class UserServiceRsTest {
 	
 	@Test
 	public void t06_shouldAddSaveAllFieldsAndEncryptPassword() {
-		Response result = service.getUser(fakeUser.getId());
+		Response result = restService.getUser(fakeUser.getId());
 		Assert.assertEquals(OK, result.getStatus());
 		final User savedUser = (User)result.getEntity();
 		Assert.assertEquals(fakeUser.getUsername(), savedUser.getUsername());
@@ -197,44 +220,44 @@ public class UserServiceRsTest {
 	public void t07_shouldUpdateUserReturn200() {
 		final String updatedUsername = "William";
 		fakeUser.setUsername(updatedUsername);
-		service.updateUser(fakeUser);
-		Response result = service.getUser(fakeUser.getId());
+		restService.updateUser(fakeUser);
+		Response result = restService.getUser(fakeUser.getId());
 		Assert.assertEquals(OK, result.getStatus());
 		Assert.assertEquals(updatedUsername, ((User) result.getEntity()).getUsername());
 	}
 
 	@Test
 	public void t08_shouldGetUserByEmailReturn200() {
-    	Assert.assertEquals(OK, service.getUserByEmail(fakeEmail).getStatus());
+    	Assert.assertEquals(OK, restService.getUserByEmail(fakeEmail).getStatus());
 	}
 
 	@Test
 	public void t09_shouldGetUserByUsernameReturn200() {
-    	Assert.assertEquals(OK, service.getUser(fakeUsername).getStatus());
+    	Assert.assertEquals(OK, restService.getUser(fakeUsername).getStatus());
 	}
 
 	@Test
 	public void t10_shouldGetUserByIdReturn200() {
-    	Assert.assertEquals(OK, service.getUser(fakeUser.getId()).getStatus());
+    	Assert.assertEquals(OK, restService.getUser(fakeUser.getId()).getStatus());
 	}
 
 	@Test
 	public void t11_shouldGetUserOnNonExistingUserReturn404() {
     	Assert.assertEquals(
     			NOT_FOUND,
-				service.getUserByEmail(generateRandomString() + "@epfl.ch").getStatus()
+				restService.getUserByEmail(generateRandomString() + "@epfl.ch").getStatus()
 		);
     	Assert.assertEquals(
     			NOT_FOUND,
-				service.getUser(generateRandomString()).getStatus()
+				restService.getUser(generateRandomString()).getStatus()
 		);
     	long fakeId = (long) 1e3;
     	try {
-    		service.deleteUser(fakeId);
+    		restService.deleteUser(fakeId);
 		} catch (EJBException ignored){}
     	Assert.assertEquals(
     			NOT_FOUND,
-				service.getUser(fakeId).getStatus()
+				restService.getUser(fakeId).getStatus()
 		);
 	}
 
@@ -242,7 +265,7 @@ public class UserServiceRsTest {
 	public void t12_loginShouldSucceedForExistingUser() {
     	Assert.assertEquals(
     			OK,
-				service.login(gson.toJson(new UsernameAndPassword(fakeUsernameAuthenticated, fakePassword))).getStatus()
+				restService.login(gson.toJson(new UsernameAndPassword(fakeUsernameAuthenticated, fakePassword))).getStatus()
 		);
 	}
 
@@ -250,7 +273,7 @@ public class UserServiceRsTest {
 	public void t13_loginShouldFailWithWrongUsername() {
     	Assert.assertEquals(
     			UNAUTHORIZED,
-				service.login(gson.toJson(new UsernameAndPassword(fakeUsernameAuthenticated + "z", fakePassword))).getStatus()
+				restService.login(gson.toJson(new UsernameAndPassword(fakeUsernameAuthenticated + "z", fakePassword))).getStatus()
 		);
 	}
 
@@ -258,7 +281,7 @@ public class UserServiceRsTest {
 	public void t14_loginShouldFailWithWrongPassword() {
 		Assert.assertEquals(
 				UNAUTHORIZED,
-				service.login(gson.toJson(new UsernameAndPassword(fakeUsernameAuthenticated, fakePassword + "z"))).getStatus()
+				restService.login(gson.toJson(new UsernameAndPassword(fakeUsernameAuthenticated, fakePassword + "z"))).getStatus()
 		);
 	}
 
@@ -266,24 +289,56 @@ public class UserServiceRsTest {
 	public void t15_loginShouldFailWithEmail() {
 		Assert.assertEquals(
 				UNAUTHORIZED,
-				service.login(gson.toJson(new UsernameAndPassword(fakeEmailAuthenticated, fakePassword))).getStatus()
+				restService.login(gson.toJson(new UsernameAndPassword(fakeEmailAuthenticated, fakePassword))).getStatus()
 		);
 	}
 
 	@Test
 	public void t16_shouldBeLoggedInAfterLogin() {
-		service.login(gson.toJson(new UsernameAndPassword(fakeEmailAuthenticated, fakePassword)));
-		Response response = service.isLoggedIn();
-		System.out.println(response.getEntity().toString());
+		restService.login(gson.toJson(new UsernameAndPassword(fakeEmailAuthenticated, fakePassword)));
+		Response response = restService.isLoggedIn();
+		Assert.assertEquals(OK, response.getStatus());
 	}
 
 	@Test
-	public void t17_shouldConfirmUserWithRightIdAndEmail() {
-		// TODO
+	public void t17_shouldConfirmUserWithRightIdAndEmailWork() {
+		List<AccountConfirmation> confirmations = userService.findAccountConfirmations(fakeEmail);
+		assertTrue(confirmations.size() > 0);
+		AccountConfirmation confirmation = confirmations.get(0);
+		Assert.assertEquals(OK, restService.confirmUser(fakeEmail, confirmation.getConfirmationId()).getStatus());
+		Assert.assertTrue(userService.findAccountConfirmations(fakeEmail).isEmpty());
+		final Optional<User> user = userService.getUserByEmail(fakeEmail);
+		Assert.assertTrue(user.isPresent());
+		Assert.assertTrue(user.get().isConfirmed());
 	}
 
 	@Test
-	public void t18_shouldResetPasswordWithRightIdAndEmail() {
-		// TODO
+	public void t18_shouldResetPasswordWithRightIdAndEmailWork() {
+		restService.requestPasswordReset(fakeEmailAuthenticated);
+		List<ResetPasswordRequest> requests = userService.findResetPasswordRequests(fakeEmailAuthenticated);
+		Assert.assertTrue(requests.size() > 0);
+		ResetPasswordRequest request = requests.get(0);
+		final String newPassword = "mynewpassword";
+		Assert.assertEquals(OK, restService.resetPassword(
+				gson.toJson(new EmailAndRequestIdAndPassword(
+						fakeEmailAuthenticated,
+						request.getRequestId(),
+						newPassword
+				))
+		).getStatus());
+		Assert.assertTrue(userService.findResetPasswordRequests(fakeEmailAuthenticated).isEmpty());
+		Assert.assertEquals(
+				OK,
+				restService.login(gson.toJson(new UsernameAndPassword(fakeUsernameAuthenticated, newPassword))).getStatus()
+		);
+	}
+
+	@Test
+	public void t19_shouldGetUsersByIdsReturnMultipleUsers() {
+		long[] ids = new long[] {fakeUser.getId(), fakeUserAuthenticated.getId()};
+		Response response = restService.getUsersByIds(gson.toJson(new Ids(ids)));
+		Assert.assertEquals(OK, response.getStatus());
+		User[] users = gson.fromJson(gson.toJson(response.getEntity()), User[].class);
+		Assert.assertEquals(2, users.length);
 	}
 }
