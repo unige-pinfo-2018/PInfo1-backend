@@ -3,9 +3,12 @@ package ch.unihub.business.service;
 import ch.unihub.dom.AccountConfirmation;
 import ch.unihub.dom.ResetPasswordRequest;
 import ch.unihub.dom.User;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +47,7 @@ public class UserServiceRs {
 	@Produces({ "application/json" })
 	public String getNbUsers() {
 		return "{\"nbUsers\":\"" + service.getNbUsers() + "\"}";
-		}
+	}
 
 	@GET
 	@Path("/by_username/{username}")
@@ -163,10 +166,30 @@ public class UserServiceRs {
 		return Response.ok(currentUser.getSession()).build();
 	}
 
+	/**
+	 * Works as long as a cookie is passed and hasn't expired.
+	 * Do not use for sensitive operations (such as changing the password, modifying the email, etc).
+	 *
+	 * @return If the user's provided the correct credentials during the current session or during
+	 * a previous session and is remembered (by a cookie).
+	 */
 	@GET
 	@Path("/isLoggedIn")
 	@Produces("application/json")
 	public Response isLoggedIn() {
+		return Response.ok(SecurityUtils.getSubject().getPrincipal() != null).build();
+	}
+
+	/**
+	 * Works only once per "login" call.
+	 * Only use for operations that need strict authentication.
+	 * 
+	 * @return If the user's provided the correct credentials during the current session.
+	 */
+	@GET
+	@Path("/isAuthenticated")
+	@Produces("application/json")
+	public Response isAuthenticated() {
 		return Response.ok(SecurityUtils.getSubject().isAuthenticated()).build();
 	}
 
