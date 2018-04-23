@@ -5,10 +5,14 @@ before_install:
   - ./runDocker.sh
   - cd ..
   - sleep 30
-  - mvn clean install
-  - mvn clean
-  - mvn clean install
 install: mvn jacoco:prepare-agent clean test
 after_success:
   - mvn jacoco:report
   - bash <(curl -s https://codecov.io/bash)
+after_failure:
+  - docker ps
+  - ls /opt/docker-deploy
+  - sleep 10
+  - mvn clean
+  - sleep 10
+  - mvn clean install
