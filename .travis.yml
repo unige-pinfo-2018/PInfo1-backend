@@ -6,7 +6,7 @@ before_install:
   - ./runDocker.sh
   - cd ..
   - sleep 10
-  - touch /opt/docker-deploy/test
+  - cp users-service.war /opt/docker-deploy/
   - sleep 5
   - ls /opt/docker-deploy/
   - sleep 5
@@ -20,10 +20,3 @@ install: mvn jacoco:prepare-agent clean test
 after_success:
   - mvn jacoco:report
   - bash <(curl -s https://codecov.io/bash)
-after_failure:
-  - docker ps
-  - ls /opt/docker-deploy
-  - sleep 10
-  - mvn clean
-  - sleep 10
-  - mvn clean install
