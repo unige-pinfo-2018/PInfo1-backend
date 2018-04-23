@@ -1,25 +1,13 @@
 language: java
 jdk: openjdk8
+sudo: required
+services:
+  - docker
 before_install:
   - mkdir /opt/docker-deploy
   - cd unihub/docker-config
   - ./runDocker.sh
-  - sleep 30
-  - docker kill $(docker ps -q)
-  - ./runDocker.sh
-  - sleep 30
-  - cd ..
-  - cp users-service.war /opt/docker-deploy/
-  - sleep 5
-  - ls /opt/docker-deploy/
-  - sleep 5
-  - ls /opt/docker-deploy/
-  - sleep 5
-  - ls /opt/docker-deploy/
-  - docker kill $(docker ps -q)
-  - cd docker-config
-  - ./runDocker.sh
-  - sleep 30
+  - sleep 20
   - cd ..
   - cp users-service.war /opt/docker-deploy/
   - sleep 5
