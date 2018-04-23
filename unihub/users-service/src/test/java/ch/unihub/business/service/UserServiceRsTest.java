@@ -30,12 +30,19 @@ import org.junit.*;
 import org.junit.runners.MethodSorters;
 import org.junit.runner.RunWith;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 @RunWith(Arquillian.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class UserServiceRsTest {
 
+	private static final Logger logger = LogManager.getLogger(UserServiceRsTest.class);
+
 	@Deployment
 	public static WebArchive create() {
+		logger.trace("Entering users service integration testing");
+
 		File[] libs = Maven.resolver()
 				.loadPomFromFile("pom.xml").importCompileAndRuntimeDependencies().resolve()
 				.withTransitivity().as(File.class);
@@ -130,6 +137,7 @@ public class UserServiceRsTest {
 
     @Test  
     public void t00_testEntityManagerInjected() {
+		logger.trace("yooooooooooo");
         assertNotNull(restService);
     }
 
