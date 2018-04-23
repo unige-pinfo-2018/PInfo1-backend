@@ -11,23 +11,21 @@ before_install:
   - sudo apt-get update
   - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
   - mkdir /opt/docker-deploy
+  - sudo chmod -R 755 /opt/docker-deploy
+  - sudo chmod -R a+x /opt/docker-deploy
+  - sudo chown /opt/docker-deploy
   - cd unihub/docker-config
   - ./runDocker.sh
-  - sleep 20
-  - cd ..
-  - cp users-service.war /opt/docker-deploy/
-  - sleep 5
-  - ls /opt/docker-deploy/
-  - sleep 5
-  - ls /opt/docker-deploy/
-  - sleep 5
-  - ls /opt/docker-deploy/
-  - wget http://localhost:18080/users-service/rest/users/nbUsers
-  - cat nbUsers
   - docker ps
   - uname -a
   - whoami
-install: mvn jacoco:prepare-agent clean test
+install:
+  - mvn install -DskipTests=true
+  - sleep 5
+  - ls /opt/docker-deploy/
+  - sleep 5
+  - ls /opt/docker-deploy/
+  - mvn jacoco:prepare-agent clean test
 after_success:
   - mvn jacoco:report
   - bash <(curl -s https://codecov.io/bash)
