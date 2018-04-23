@@ -13,7 +13,7 @@ before_install:
   - mkdir /opt/docker-deploy
   - sudo chmod -R 755 /opt/docker-deploy
   - sudo chmod -R a+x /opt/docker-deploy
-  - sudo chown /opt/docker-deploy
+  - sudo chown travis:travis /opt/docker-deploy
   - cd unihub/docker-config
   - ./runDocker.sh
   - docker ps
