@@ -5,6 +5,8 @@ before_install:
   - ./runDocker.sh
   - cd ..
   - sleep 3
+  - docker ps
+  - sleep 10
 install: mvn jacoco:prepare-agent clean test
 after_success:
   - mvn jacoco:report
