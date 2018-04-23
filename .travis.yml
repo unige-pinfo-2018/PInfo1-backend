@@ -19,8 +19,9 @@ before_install:
   - docker ps
   - uname -a
   - whoami
+  - cd ..
 install:
-  - mvn install -DskipTests=true
+  - mvn clean install -DskipTests=true
   - sleep 5
   - ls /opt/docker-deploy/
   - sleep 5
