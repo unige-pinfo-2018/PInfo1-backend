@@ -46,7 +46,7 @@ public class PostServiceRs {
         return postResponse(service.getPost(id));
     }
 
-	@GET
+	/*@GET
 	@Path("/content_by_ids/")
 	@Produces({ "application/json" })
 	public Response getContent(
@@ -60,6 +60,14 @@ public class PostServiceRs {
 				list.add(postResponse(service.getPost(Long.parseLong(Integer.toString(i)))));
 			}
 		return Response.ok(list).build();
+	}*/
+
+	/* Returns 5 posts (or less if we reach the bottom of our DB) that are not comments */
+	@GET
+	@Path("/contents")
+	@Produces({"application/json"})
+	public List getSeveralPosts(@QueryParam("nbPost") int nbPost) {
+		return service.getSeveralPosts(nbPost);
 	}
 
 	@GET
@@ -80,7 +88,7 @@ public class PostServiceRs {
 		return Response.ok(list).build();
 	}
 
-	@GET
+	/*@GET
 	@Path("/getCommentsForPosts/")
 	@Produces({ "application/json" })
 	public Response getCommentsForPosts(
@@ -106,7 +114,7 @@ public class PostServiceRs {
 			}
 		}
 		return Response.ok(commentsForAllPosts).build();
-	}
+	}*/
 	
     @GET
     @Path("/userId_by_id/{id}")

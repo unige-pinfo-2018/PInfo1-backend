@@ -80,4 +80,6 @@ public interface PostService extends Serializable {
     List getPostsAndCommentsByTags(String questionUser, int nbPost, List<String> listTags);
 
 	List getPostsAndCommentsByIds(List<Long> listIds);
+
+    List getSeveralPosts(int nbPost);
 }
