@@ -5,7 +5,17 @@ before_install:
   - cd unihub/docker-config
   - ./runDocker.sh
   - cd ..
-  - sleep 30
+  - sleep 10
+  - touch /opt/docker-deploy/test
+  - sleep 5
+  - ls /opt/docker-deploy/
+  - sleep 5
+  - ls /opt/docker-deploy/
+  - sleep 5
+  - ls /opt/docker-deploy/
+  - docker ps
+  - uname -a
+  - whoami
 install: mvn jacoco:prepare-agent clean test
 after_success:
   - mvn jacoco:report
