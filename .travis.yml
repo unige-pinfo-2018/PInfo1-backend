@@ -4,4 +4,8 @@ before_install:
   - cd unihub/docker-config
   - ./runDocker.sh
   - cd ..
-install: mvn clean install
+  - sleep 3
+install: mvn jacoco:prepare-agent clean test
+after_success:
+  - mvn jacoco:report
+  - bash <(curl -s https://codecov.io/bash)
