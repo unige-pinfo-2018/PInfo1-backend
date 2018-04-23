@@ -4,8 +4,11 @@ before_install:
   - mkdir /opt/docker-deploy
   - cd unihub/docker-config
   - ./runDocker.sh
+  - sleep 30
+  - docker kill $(docker ps -q)
+  - ./runDocker.sh
+  - sleep 30
   - cd ..
-  - sleep 10
   - cp users-service.war /opt/docker-deploy/
   - sleep 5
   - ls /opt/docker-deploy/
@@ -13,6 +16,20 @@ before_install:
   - ls /opt/docker-deploy/
   - sleep 5
   - ls /opt/docker-deploy/
+  - docker kill $(docker ps -q)
+  - cd docker-config
+  - ./runDocker.sh
+  - sleep 30
+  - cd ..
+  - cp users-service.war /opt/docker-deploy/
+  - sleep 5
+  - ls /opt/docker-deploy/
+  - sleep 5
+  - ls /opt/docker-deploy/
+  - sleep 5
+  - ls /opt/docker-deploy/
+  - wget http://localhost:18080/users-service/rest/users/nbUsers
+  - cat nbUsers
   - docker ps
   - uname -a
   - whoami
