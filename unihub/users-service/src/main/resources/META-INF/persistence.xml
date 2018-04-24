@@ -13,14 +13,13 @@
 		<class>ch.unihub.dom.Curriculum</class>
 		<class>ch.unihub.dom.ResetPasswordRequest</class>
 		<class>ch.unihub.dom.Role</class>
+ 
 
 		<properties>
-			<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
-			<property name="hibernate.connection.url">jdbc:mysql://localhost:13306/UNIHUB_DB</property>
-			<property name="hibernate.connection.username">root</property>
-			<property name="hibernate.connection.password">admin</property>
-			<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
-
+			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
+			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:13306/ACADEMI-CO_DB" />
+			<property name="javax.persistence.jdbc.user" value="root" />
+			<property name="javax.persistence.jdbc.password" value="admin" />
 			<property name="hibernate.hbm2ddl.auto" value="update" />
 			<property name="hibernate.show_sql" value="true" />
 		</properties>
