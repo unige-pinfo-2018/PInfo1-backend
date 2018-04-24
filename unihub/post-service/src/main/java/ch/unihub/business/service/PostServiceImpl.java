@@ -393,25 +393,10 @@ public class PostServiceImpl implements PostService {
 		List res = new ArrayList<>();
 		List<Long> ids = new ArrayList<>();
 		if (n-nbPost > 0) {
-			int offset = 0;
-			// Counts the number of comments that we need to skip
-			for (int i = n; i>=n-nbPost+1; i--) {
-				Optional<Post> p = getPost(Long.parseLong(Integer.toString(i)));
-				if (p.get().getParentId() != null) {
-					offset++; // need to fetch more posts that are not comments
-				}
-			}
-			int start = n-nbPost-offset;
-			int stop = n-nbPost-offset-4; // by default we want to fetch 5 posts
-			if (stop < 1) { // we reached the bottom of the DB
-				stop = 1;
-			}
-			if (start > 0) {
-				for (int i=start; i>=stop; i--){
+			if (n > 0) {
+				for (int i=n; i>=1; i--){
 					Optional<Post> p = getPost(Long.parseLong(Integer.toString(i)));
-					if (p.get().getParentId() != null){
-						stop--; // need to fetch more posts that are not comments
-					} else {
+					if (p.get().getParentId() == null) {
 						res.add(p.get());
 						ids.add(Long.parseLong(Integer.toString(i)));
 					}

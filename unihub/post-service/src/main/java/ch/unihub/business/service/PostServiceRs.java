@@ -8,10 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Path("/posts")
 public class PostServiceRs {
@@ -54,8 +51,22 @@ public class PostServiceRs {
 	@GET
 	@Path("/contents")
 	@Produces({"application/json"})
-	public List getSeveralPosts(@QueryParam("nbPost") int nbPost) {
-		return service.getSeveralPosts(nbPost);
+	public List getSeveralPosts() {
+		List<Post> p = service.getAll();
+		List<Long> ids = new ArrayList();
+		Collections.reverse(p);
+		for (ListIterator<Post> iter = p.listIterator(); iter.hasNext(); ) {
+			Post a = iter.next();
+			if (a.getParentId() != null) {
+				iter.remove();
+			} else {
+				ids.add(a.getId());
+			}
+		}
+		List res = new ArrayList();
+		res.add(p);
+		res.add(getCommentsByQuestionID(ids));
+		return res;
 	}
 
 	@GET
