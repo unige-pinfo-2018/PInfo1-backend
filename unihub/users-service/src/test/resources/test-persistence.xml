@@ -4,6 +4,7 @@
 	<persistence-unit name="unihub-pu"
 		transaction-type="JTA">
 
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
 
 		<jta-data-source>UNIHUBDS</jta-data-source>
 
@@ -13,7 +14,9 @@
 		<class>ch.unihub.dom.ResetPasswordRequest</class>
 		<class>ch.unihub.dom.Role</class>
 		<properties>
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
 			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
+			<property name="hibernate.show_sql" value="true" />
 		</properties>
 	</persistence-unit>
 </persistence>
