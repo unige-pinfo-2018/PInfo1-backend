@@ -9,7 +9,18 @@
 		<jta-data-source>UNIHUBDS</jta-data-source>
 
 		<class>ch.unihub.dom.User</class>
+		<class>ch.unihub.dom.AccountConfirmation</class>
+		<class>ch.unihub.dom.Curriculum</class>
+		<class>ch.unihub.dom.ResetPasswordRequest</class>
+		<class>ch.unihub.dom.Role</class>
+
 		<properties>
+			<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+			<property name="hibernate.connection.url">jdbc:mysql://localhost:13306/UNIHUB_DB</property>
+			<property name="hibernate.connection.username">root</property>
+			<property name="hibernate.connection.password">admin</property>
+			<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+
 			<property name="hibernate.hbm2ddl.auto" value="update" />
 			<property name="hibernate.show_sql" value="true" />
 		</properties>
