@@ -1,6 +1,8 @@
 package ch.unihub.business.service;
-
 import ch.unihub.dom.Post;
+import ch.unihub.dom.Tag;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -12,7 +14,9 @@ import java.util.*;
 
 @Path("/posts")
 public class PostServiceRs {
-	@Inject
+    private static final Logger logger = LogManager.getLogger(PostServiceRs.class);
+
+    @Inject
 	private PostService service;
 
 	@GET
@@ -36,7 +40,6 @@ public class PostServiceRs {
 	public String helloWorld() 
 	{
 		return "Hello World";
-		//return "{\"nbPosts\":\"" + service.getNextPostId() + "\"}";
 	}
 	
 	@GET
@@ -45,22 +48,6 @@ public class PostServiceRs {
     public Response getPost(@PathParam("id") Long id) {
         return postResponse(service.getPost(id));
     }
-
-	/*@GET
-	@Path("/content_by_ids/")
-	@Produces({ "application/json" })
-	public Response getContent(
-			@QueryParam("from") int from,
-			@QueryParam("to") int to) {
-		List<Response> list = new ArrayList<>();
-		for(int i = from; i <= to; i++)
-			if (service.getPost(Long.parseLong(Integer.toString(i))).get().getParentId() != null && to<service.getNbPosts()){
-				to+=1;
-			} else {
-				list.add(postResponse(service.getPost(Long.parseLong(Integer.toString(i)))));
-			}
-		return Response.ok(list).build();
-	}*/
 
 	/* Returns 5 posts (or less if we reach the bottom of our DB) that are not comments */
 	@GET
@@ -87,34 +74,6 @@ public class PostServiceRs {
 		}
 		return Response.ok(list).build();
 	}
-
-	/*@GET
-	@Path("/getCommentsForPosts/")
-	@Produces({ "application/json" })
-	public Response getCommentsForPosts(
-			@QueryParam("from") int from,
-			@QueryParam("to") int to) {
-		HashMap<Integer, List<Post>> commentsForAllPosts = new HashMap<>();
-		int nbPosts = service.getNbPosts();
-		for(int i = from; i <= to; i++){
-			if (service.getPost(Long.parseLong(Integer.toString(i))).get().getParentId() != null && to<service.getNbPosts()){
-				to+=1;
-			} else {
-				List<Post> list = new ArrayList<>();
-				for (int j = 1; j <= nbPosts; j++) {
-					Long pID = service.getParentIdPost((Long.parseLong(Integer.toString(j))));
-					if (pID != null) {
-						Optional<Post> p = service.getPost((Long.parseLong(Integer.toString(j))));
-						if (Long.parseLong(Integer.toString(i)) == pID) {
-							p.ifPresent(list::add);
-						}
-					}
-				}
-				commentsForAllPosts.put(i, list);
-			}
-		}
-		return Response.ok(commentsForAllPosts).build();
-	}*/
 	
     @GET
     @Path("/userId_by_id/{id}")
@@ -167,6 +126,7 @@ public class PostServiceRs {
 
 	@PUT
 	@Path("/addPost")
+    @Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	public Response addPost(@NotNull Post post) throws URISyntaxException {
 		service.addPost(post);
@@ -236,4 +196,19 @@ public class PostServiceRs {
     public List getCommentsByQuestionID(@QueryParam("id") List<Long> listIds) {
         return service.getCommentsByQuestionID(listIds);
     }
+
+
+    /*
+	@PUT
+	@Path("/addPostAndTag")
+	@Consumes({ "application/json" })
+	@Produces({ "application/json" })
+	public Response addPost2(@QueryParam("userId") Long userId, @QueryParam("content") String content,@QueryParam("name") List<String> name,@QueryParam("parentId") Long parentId) throws URISyntaxException {
+	    Long id;
+        id = service.addPostAndTag(Long userId, String content,String name,Long parentId);
+        return Response
+				.status(Response.Status.CREATED)
+				.contentLocation(new URI("posts/by_id/" + id.toString()))
+				.build();
+	}*/
 }

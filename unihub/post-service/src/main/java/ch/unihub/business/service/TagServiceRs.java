@@ -14,6 +14,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -47,6 +48,16 @@ public class TagServiceRs
         return Response
                 .status(Response.Status.CREATED)
                 .contentLocation(new URI("tags/by_id/" + tag.getId().toString()))
+                .build();
+    }
+    //void addTags(Long postId, List<String> lisName);
+    @PUT
+    @Path("/addTags")
+    @Produces({ "application/json" })
+    public Response addTag(@QueryParam("postId") Long postId,@QueryParam("names") List<String> names) throws URISyntaxException {
+        service.addTags(postId,names);
+        return Response
+                .status(Response.Status.CREATED)
                 .build();
     }
 }

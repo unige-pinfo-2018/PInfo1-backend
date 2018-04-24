@@ -56,6 +56,8 @@ public interface PostService extends Serializable {
 	//add post 
 	void addPost(@NotNull final Post post);
 
+	//Long addPostAndTag(Long userId, String content,String name,Long parentId);
+
     //add like
     void addLike(@NotNull final Like like);
 
@@ -64,6 +66,8 @@ public interface PostService extends Serializable {
 
     //add tag
     void addTag(@NotNull final Tag tag);
+
+    void addTags(Long postId, List<String> lisName);
 
 	//update post
 	Optional<Post> updatePost(final Post updatedPost);
@@ -82,4 +86,6 @@ public interface PostService extends Serializable {
 	List getPostsAndCommentsByIds(List<Long> listIds);
 
     List getSeveralPosts(int nbPost);
+
+
 }

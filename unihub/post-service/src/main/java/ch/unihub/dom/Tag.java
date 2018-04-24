@@ -34,6 +34,13 @@ public class Tag implements Serializable {
     @Column(name = "NAME")
     private String name;
 
+    public Tag() {
+    }
+    public Tag(Long postId, String name) {
+        this.setPostId(postId);
+        this.setName(name);
+    }
+
     public final Long getId() {
         return id;
     }

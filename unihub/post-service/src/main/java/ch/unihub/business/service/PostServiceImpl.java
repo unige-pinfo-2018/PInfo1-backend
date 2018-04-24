@@ -420,4 +420,27 @@ public class PostServiceImpl implements PostService {
 		return res;
 	}
 
+
+	/*
+	@Override
+    public Long addPostAndTag(Long userId, String content,String name,Long parentId)
+    {
+        Post post = new Post(userId,parentId,content);
+        addPost(post);
+
+        Long postId =post.getId();
+        Tag tag = new Tag((long) postId,name);
+        addTag(tag);
+        return postId;
+    }*/
+
+	@Override
+    public void addTags(Long postId, List<String> lisName)
+    {
+        for (String aLisName : lisName) {
+            Tag tag = new Tag((long) postId, aLisName);
+            addTag(tag);
+        }
+    }
+
 }

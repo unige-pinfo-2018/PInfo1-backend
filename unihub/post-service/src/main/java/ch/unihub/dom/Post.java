@@ -44,6 +44,18 @@ public class Post implements Serializable {
     @Column(name = "DATEPOST")
     private Date datePost;
 
+	public Post() {
+	}
+	public Post(Long userId, String content) {
+		this.setUserId(userId);
+		this.setContent(content);
+	}
+	public Post(Long userId, Long parentId, String content) {
+		this.setUserId(userId);
+		this.setParentId(parentId);
+		this.setContent(content);
+	}
+
 	public void copyFields(final Post post) {
 		if (post.getUserId() != null)
 			this.setUserId(post.getUserId());
