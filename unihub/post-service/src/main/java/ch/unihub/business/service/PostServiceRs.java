@@ -1,6 +1,5 @@
 package ch.unihub.business.service;
 import ch.unihub.dom.Post;
-import ch.unihub.dom.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -8,9 +7,11 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Path("/posts")
 public class PostServiceRs {
@@ -128,12 +129,8 @@ public class PostServiceRs {
 	@Path("/addPost")
     @Consumes({ "application/json" })
 	@Produces({ "application/json" })
-	public Response addPost(@NotNull Post post) throws URISyntaxException {
-		service.addPost(post);
-		return Response
-				.status(Response.Status.CREATED)
-				.contentLocation(new URI("posts/by_id/" + post.getId().toString()))
-				.build();
+	public Long addPost(@NotNull Post post) throws URISyntaxException {
+		return service.addPost(post);
 	}
 
     private Response postResponse(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<Post> postOptional) {

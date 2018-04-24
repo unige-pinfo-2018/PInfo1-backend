@@ -111,7 +111,7 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
-	public void addPost(@NotNull Post newPost) {
+	public Long addPost(@NotNull Post newPost) {
 		newPost.setId(null);
 		Date date= new Date();
 		//getTime() returns current time in milliseconds
@@ -120,6 +120,8 @@ public class PostServiceImpl implements PostService {
 		Timestamp ts = new Timestamp(time);
 		newPost.setDatePost(ts);
 		entityManager.persist(newPost);
+		entityManager.flush();
+		return newPost.getId();
 	}
 
 	@Override

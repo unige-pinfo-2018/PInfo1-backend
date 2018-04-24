@@ -54,7 +54,7 @@ public interface PostService extends Serializable {
 	//get text of post with the id
 	String getContent(final Long idPost);
 	//add post 
-	void addPost(@NotNull final Post post);
+	Long addPost(@NotNull final Post post);
 
 	//Long addPostAndTag(Long userId, String content,String name,Long parentId);
 
