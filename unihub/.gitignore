@@ -20,7 +20,6 @@ buildNumber.properties
 cmake-build-debug/
 cmake-build-release/
 
-
 # File-based project format
 *.iws
 
@@ -43,3 +42,8 @@ fabric.properties
 
 *.jar
 !libs/**/*.jar
+
+*.html
+**/.resources
+**/jacoco.csv
+**/jacoco.xml

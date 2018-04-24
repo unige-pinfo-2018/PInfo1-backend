@@ -302,11 +302,12 @@ public class UserServiceRsTest {
 				restService.login(gson.toJson(new UsernameAndPassword(fakeUsernameAuthenticated, fakePassword))).getStatus()
 		);
 		// tries two times
-		for (int i = 0; i < 2; i++) {
-			Response response = restService.isLoggedIn();
-			Assert.assertEquals(OK, response.getStatus());
-			Assert.assertTrue((boolean) response.getEntity());
-		}
+		Response response = restService.isLoggedIn();
+		Assert.assertEquals(OK, response.getStatus());
+		Object[] isLoggedInAndUser = (Object[]) response.getEntity();
+		Assert.assertEquals(2, isLoggedInAndUser.length);
+		Assert.assertTrue((boolean) isLoggedInAndUser[0]);
+		Assert.assertEquals(fakeUserAuthenticated.getUsername(), ((User) isLoggedInAndUser[1]).getUsername());
 	}
 
 	@Test
@@ -349,5 +350,10 @@ public class UserServiceRsTest {
 		Assert.assertEquals(OK, response.getStatus());
 		User[] users = gson.fromJson(gson.toJson(response.getEntity()), User[].class);
 		Assert.assertEquals(2, users.length);
+	}
+
+	@Test
+	public void t20_shouldIsLoggedInReturnFalseWhenUserIsLoggedOut() {
+		Assert.assertFalse((boolean) ((Object[]) restService.isLoggedIn().getEntity())[0]);
 	}
 }

@@ -177,7 +177,12 @@ public class UserServiceRs {
 	@Path("/isLoggedIn")
 	@Produces("application/json")
 	public Response isLoggedIn() {
-		return Response.ok(SecurityUtils.getSubject().getPrincipal() != null).build();
+		final String username = (String) SecurityUtils.getSubject().getPrincipal();
+		final User currentUser = service.getUser(username).orElse(null);
+		return Response.ok(new Object[] {
+				username != null,
+				currentUser
+		}).build();
 	}
 
 	/**
