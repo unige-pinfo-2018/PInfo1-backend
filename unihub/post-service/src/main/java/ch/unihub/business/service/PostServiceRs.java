@@ -140,8 +140,12 @@ public class PostServiceRs {
 	@Path("/addPost")
     @Consumes({ "application/json" })
 	@Produces({ "application/json" })
-	public Long addPost(@NotNull Post post) throws URISyntaxException {
-		return service.addPost(post);
+	public Response addPost(@NotNull Post post) throws URISyntaxException {
+		if (post.getUserId() == null || post.getContent() == null || post.getContent().length() > 400)
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		else
+			return Response.status(Response.Status.CREATED).entity(service.addPost(post)).build();
+		//return service.addPost(post);
 	}
 
     private Response postResponse(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<Post> postOptional) {
