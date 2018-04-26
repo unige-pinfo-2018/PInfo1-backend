@@ -20,7 +20,7 @@ public class PostServiceRs {
 	@GET
 	@Path("/nbPosts")
 	@Produces({ "application/json" })
-	public String getNbUsers()
+	public String getNbPosts()
 	{
 		int n = service.getNbPosts();
 		int nbPostNotComment = 0;
@@ -48,6 +48,7 @@ public class PostServiceRs {
     }
 
 	/* Returns 5 posts (or less if we reach the bottom of our DB) that are not comments */
+	// TODO = destroy this things
 	@GET
 	@Path("/contents")
 	@Produces({"application/json"})
@@ -69,6 +70,7 @@ public class PostServiceRs {
 		return res;
 	}
 
+	// TODO destroy also that
 	@GET
 	@Path("/getCommentsForPost/{idPost}")
 	@Produces({ "application/json" })
@@ -90,15 +92,15 @@ public class PostServiceRs {
     @GET
     @Path("/userId_by_id/{id}")
     @Produces({ "application/json" })
-    public Long getUserIdPost(@PathParam("id") Long id) {
-        return service.getUserIdPost(id);
+    public Response getUserIdPost(@PathParam("id") Long id) {
+        return Response.status(Response.Status.OK).entity(service.getUserIdPost(id)).build();
     }
 
 	@GET
 	@Path("/parentId_by_id/{id}")
 	@Produces({ "application/json" })
-	public Long getParentIdPost(@PathParam("id") Long id) {
-		return service.getParentIdPost(id);
+	public Response getParentIdPost(@PathParam("id") Long id) {
+		return Response.status(Response.Status.OK).entity(service.getParentIdPost(id)).build();
 	}
 
 	@GET
@@ -111,15 +113,17 @@ public class PostServiceRs {
 	@GET
 	@Path("/nbUpvotes_by_id/{idPost}")
 	@Produces({ "application/json" })
-	public Long getNbUpvotes(@PathParam("idPost") Long idPost) {
-		return service.getNbUpvotes(idPost);
+	public Response getNbUpvotes(@PathParam("idPost") Long idPost) {
+		return Response.status(Response.Status.OK).entity(service.getNbUpvotes(idPost)).build();
+		//return service.getNbUpvotes(idPost);
 	}
 
 	@GET
 	@Path("/date_by_id/{idPost}")
 	@Produces({ "application/json" })
-	public Date getDate(@PathParam("idPost") Long idPost) {
-		return service.getDate(idPost);
+	public Response getDate(@PathParam("idPost") Long idPost) {
+		return Response.status(Response.Status.OK).entity(service.getDate(idPost)).build();
+		//return service.getDate(idPost);
 	}
 
 	@GET
@@ -132,8 +136,9 @@ public class PostServiceRs {
 	@GET
 	@Path("/listIdTags_by_id/{idPost}")
 	@Produces({ "application/json" })
-	public List<Long> getListIdTags(@PathParam("idPost") Long idPost) {
-		return service.getListIdTags(idPost);
+	public Response getListIdTags(@PathParam("idPost") Long idPost) {
+		return Response.status(Response.Status.OK).entity(service.getListIdTags(idPost)).build();
+		//return service.getListIdTags(idPost);
 	}
 
 	@PUT

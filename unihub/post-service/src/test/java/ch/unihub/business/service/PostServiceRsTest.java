@@ -70,11 +70,12 @@ public class PostServiceRsTest {
 
     @Test
     public void t3_verifyAddPost() throws URISyntaxException {
-        // No Content
+
         Post post = new Post();
-        long userId=1;
+        long userId=16;
         post.setUserId(userId);
         post.setContent("well");
+        //verify if it's create
         Assert.assertEquals(201, sut.addPost(post).getStatus());
     }
 
@@ -86,10 +87,63 @@ public class PostServiceRsTest {
         post.setUserId(userId);
         Assert.assertEquals(400, sut.addPost(post).getStatus());
 
+        //No userId
         Post post2 = new Post();
         post2.setContent("a question");
         Assert.assertEquals(400, sut.addPost(post2).getStatus());
     }
 
+    @Test
+    public void t5_nbPosts() {
+        String result = sut.getNbPosts();
+        System.out.println(result);
+        //verify if return nbPosts and number
+        Assert.assertTrue(result.contains("nbPosts"));
+    }
 
+    @Test
+    public void t6_getPostById() throws URISyntaxException {
+        //verify if an answer
+        Assert.assertEquals(200, sut.getPost((long) 1).getStatus());
+    }
+
+    @Test
+    public void t6_getUserIdOfPostById() throws URISyntaxException {
+        //verify if an answer
+        Assert.assertEquals(200, sut.getUserIdPost((long) 1).getStatus());
+
+        //verify if it return the good number *define in test t3
+        Assert.assertTrue((long)16 == (long)sut.getUserIdPost((long) 1).getEntity());
+    }
+
+    @Test
+    public void t7_getParentIdOfPostById() throws URISyntaxException {
+        //verify if an answer
+        Assert.assertEquals(200, sut.getParentIdPost((long) 1).getStatus());
+    }
+
+    @Test
+    public void t8_getNbUpvotesOfPostById() throws URISyntaxException {
+        //verify if an answer
+        Assert.assertEquals(200, sut.getNbUpvotes((long) 1).getStatus());
+    }
+
+    @Test
+    public void t9_getDateOfPostById() throws URISyntaxException {
+        //verify if an answer
+        Assert.assertEquals(200, sut.getDate((long) 1).getStatus());
+    }
+
+    @Test
+    public void t10_getContentOfPostByID() {
+        String result = sut.getContent((long)1);
+        //verify if return nbPosts and number
+        Assert.assertTrue(result.contains("content"));
+    }
+
+    @Test
+    public void t11_getListIdTagsOfPostById() throws URISyntaxException {
+        //verify if an answer
+        Assert.assertEquals(200, sut.getListIdTags((long) 1).getStatus());
+    }
 }
