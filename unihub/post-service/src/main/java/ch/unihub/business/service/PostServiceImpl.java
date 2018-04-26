@@ -272,7 +272,7 @@ public class PostServiceImpl implements PostService {
         listTagsSql=listTagsSql.concat(") AND TAGS.POSTID = POSTS.ID ");
         if (listTags.size() == 0)
         {
-            listTagsSql=" ";
+            listTagsSql="";
         }
 
         String MatchQuestionSql;
@@ -280,11 +280,11 @@ public class PostServiceImpl implements PostService {
         if (QuestionUser == null)
         {
             MatchQuestionSql =" FROM POSTS ";
-            MatchQuestionSql2 ="ORDER BY POSTS.ID DESC LIMIT "+nbPost+";\n";
+            MatchQuestionSql2 ="ORDER BY POSTS.ID DESC LIMIT "+nbPost+";";
         }
         else {
             MatchQuestionSql= ", MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) AS score FROM POSTS ";
-            MatchQuestionSql2 = "AND MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) > 0 ORDER BY score DESC LIMIT "+nbPost+";\n";
+            MatchQuestionSql2 = "AND MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) > 0 ORDER BY score DESC LIMIT "+nbPost+";";
 
         }
 

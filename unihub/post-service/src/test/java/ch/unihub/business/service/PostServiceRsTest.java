@@ -55,6 +55,11 @@ public class PostServiceRsTest {
 	@Inject
 	private PostServiceRs sut;
 
+    private final Post fakePost = new Post((long) 16,"fake text");
+    @Before
+    public void beforeTest() throws URISyntaxException {
+        sut.addPost(fakePost);
+    }
 
     @Test  
     public void t1_testEntityManagerInjected() {  
@@ -112,7 +117,7 @@ public class PostServiceRsTest {
         //verify if an answer
         Assert.assertEquals(200, sut.getUserIdPost((long) 1).getStatus());
 
-        //verify if it return the good number *define in test t3
+        //verify if it return the good number *define at the begining
         Assert.assertTrue((long)16 == (long)sut.getUserIdPost((long) 1).getEntity());
     }
 
@@ -146,4 +151,24 @@ public class PostServiceRsTest {
         //verify if an answer
         Assert.assertEquals(200, sut.getListIdTags((long) 1).getStatus());
     }
+
+    @Test
+    public void t12_verifyUpdatePost() throws URISyntaxException {
+        //creat a post
+        Post postBegin = new Post();
+        postBegin.setUserId((long) 12);
+        postBegin.setContent("for test update");
+
+        //add the post to bdd
+        long idPost= (long) sut.addPost(postBegin).getEntity();
+
+        //return the post
+        Post post = (Post) sut.getPost(idPost).getEntity();
+
+        //change somethings and verify
+        post.setContent("new content");
+        System.out.println(post.getContent());
+        Assert.assertEquals(200, sut.updatePost(post).getStatus());
+    }
+
 }

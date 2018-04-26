@@ -174,8 +174,14 @@ public class PostServiceRs {
 	@GET
 	@Path("/searchPost")
 	@Produces({ "application/json" })
-	public List searchPost(@QueryParam("q") String questionUser,@QueryParam("n") int nbPost,@QueryParam("t") List<String> listTags) {
-		return service.searchPost(questionUser,nbPost,listTags);
+	public Response searchPost(@QueryParam("q") String questionUser,@QueryParam("n") int nbPost,@QueryParam("t") List<String> listTags) {
+        List  listSearch = service.searchPost(questionUser,nbPost,listTags);
+        return listSearch.size() != 0 ?
+                Response.status(Response.Status.OK).entity(listSearch).build() :
+                Response.status(Response.Status.NOT_FOUND).build();
+
+        //return Response.status(Response.Status.OK).entity(service.searchPost(questionUser,nbPost,listTags)).build();
+		//return service.searchPost(questionUser,nbPost,listTags);
 	}
 
 	@GET
