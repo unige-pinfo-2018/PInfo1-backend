@@ -35,7 +35,7 @@ public class NotificationsService {
     private EntityManager entityManager;
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("username") String username) throws IOException {
+    public void onOpen(Session session, @PathParam("username") String username) {
         // Get session and WebSocket connection
         this.session = session;
         sessions.add(session);
@@ -43,7 +43,7 @@ public class NotificationsService {
     }
 
     @OnMessage
-    public void onMessage(Session session, String message) throws IOException, EncodeException {
+    public void onMessage(Session session, String message) throws IOException {
         // Handle new messages
         final String username = users.get(session.getId());
         NotificationServiceMessage parsedMessage =
@@ -69,7 +69,7 @@ public class NotificationsService {
     }
 
     @OnClose
-    public void onClose(Session session) throws IOException {
+    public void onClose(Session session) {
         // WebSocket connection closes
         sessions.remove(session);
         users.remove(session.getId());
@@ -180,13 +180,13 @@ public class NotificationsService {
         entityManager.createQuery(deleteQuery).executeUpdate();
     }
 
-    private void handleGetRequest(final String username, String body, final RemoteEndpoint.Basic remote) throws IOException, EncodeException {
+    private void handleGetRequest(final String username, String body, final RemoteEndpoint.Basic remote) throws IOException {
         switch (body) {
             case "last":
-                remote.sendObject(getLastNotifications(username));
+                remote.sendText(gson.toJson(getLastNotifications(username)));
                 break;
             case "all":
-                remote.sendObject(getAllNotifications(username));
+                remote.sendText(gson.toJson(getAllNotifications(username)));
                 break;
             default:
                 // Removes spaces
@@ -200,7 +200,7 @@ public class NotificationsService {
                     try {
                         final int from = Integer.valueOf(bounds[0]);
                         final int to = Integer.valueOf(bounds[1]);
-                        remote.sendObject(getNotifications(username, from, to));
+                        remote.sendText(gson.toJson(getNotifications(username, from, to)));
                     } catch (NumberFormatException e) {
                         logger.error(e.getMessage());
                         throw new IllegalArgumentException("Bad request formatting. Can't extract range.");
@@ -230,8 +230,8 @@ public class NotificationsService {
         // If the recipient is currently connected, it will receive a notification right away
         findNotificationServiceForUser(recipient).ifPresent(recipientSession -> {
             try {
-                recipientSession.getBasicRemote().sendObject(createdNotification);
-            } catch (IOException | EncodeException e) {
+                recipientSession.getBasicRemote().sendText(gson.toJson(createdNotification));
+            } catch (IOException e) {
                 logger.error(e.getMessage());
             }
         });

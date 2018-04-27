@@ -9,7 +9,7 @@
     <Root level="error">
       <AppenderRef ref="Console"/>
     </Root>
-	<Logger name="ch.unihub.business.service.UserServiceRsTest" level="trace">
+	<Logger name="ch.unihub.business.service.NotificationsServiceTest" level="trace">
 	  <AppenderRef ref="Console"/>
 	</Logger>
   </Loggers>

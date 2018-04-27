@@ -1,7 +1,6 @@
 package ch.unihub.business.service;
 
 import javax.inject.Inject;
-import javax.websocket.EncodeException;
 import javax.websocket.RemoteEndpoint;
 import javax.websocket.Session;
 
@@ -23,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -39,25 +39,24 @@ public class NotificationsServiceTest {
 
 	private final static Logger logger = LoggerFactory.getLogger(NotificationsServiceTest.class);
 
-	private static Session createMockSession(final String username) throws IOException, EncodeException {
+	private static Session createMockSession(final String username) throws IOException {
 		Session mockedSession = Mockito.mock(Session.class);
 		RemoteEndpoint.Basic mockedBasic = Mockito.mock(RemoteEndpoint.Basic.class);
 		// Saves sent notifications
 		Mockito.doAnswer(
 				(Answer<Void>) invocationOnMock -> {
 					Object arg = invocationOnMock.getArguments()[0];
-					if (arg instanceof List) {
+					try {
 						// Multiple notifications: probably a GET request
-						List notifications = (List) arg;
-						for (Object notification : notifications)
-							receivedNotifications.add((Notification) notification);
-					} else {
+						Notification[] notifications = gson.fromJson((String) arg, Notification[].class);
+						Collections.addAll(receivedNotifications, notifications);
+					} catch (Exception ignored) {
 						// One notification, probably just created and sent to the recipient
-						hotNotification = (Notification) arg;
+						hotNotification = gson.fromJson((String) arg, Notification.class);
 					}
 					return null;
 				}
-		).when(mockedBasic).sendObject(Mockito.anyObject());
+		).when(mockedBasic).sendText(Mockito.anyString());
 		Mockito.when(mockedSession.getBasicRemote()).thenReturn(mockedBasic);
 		Mockito.when(mockedSession.getId()).thenReturn(username);
 		return mockedSession;
@@ -67,7 +66,7 @@ public class NotificationsServiceTest {
 		try {
 			kikiSession = createMockSession("kiki");
 			arthurSession = createMockSession(recipient);
-		} catch (IOException | EncodeException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -95,7 +94,7 @@ public class NotificationsServiceTest {
 	}
 
 	@Before
-	public void before() throws IOException, EncodeException {
+	public void before() throws IOException {
 		notificationsService.onOpen(arthurSession, recipient);
 		// Creates 6 notifications for same user
 		notificationsService.onOpen(kikiSession, "kiki");
@@ -114,7 +113,7 @@ public class NotificationsServiceTest {
 	}
 
 	@After
-	public void after() throws IOException, EncodeException {
+	public void after() throws IOException {
 		receivedNotifications.clear();
 		hotNotification = null;
 		String deleteAll = gson.toJson(new NotificationServiceMessage(
@@ -128,7 +127,7 @@ public class NotificationsServiceTest {
 	}
 
 	@Test
-	public void t00_getLastNotificationsShouldReturn5Notifications() throws IOException, EncodeException {
+	public void t00_getLastNotificationsShouldReturn5Notifications() throws IOException {
 		NotificationServiceMessage message = new NotificationServiceMessage(
 				NotificationServiceMessage.MessageType.GET,
 				"last"
@@ -146,7 +145,7 @@ public class NotificationsServiceTest {
 	}
 
 	@Test
-	public void t01_setAllReadShouldSetAllNotificationsToRead() throws IOException, EncodeException {
+	public void t01_setAllReadShouldSetAllNotificationsToRead() throws IOException {
 		NotificationServiceMessage message = new NotificationServiceMessage(
 				NotificationServiceMessage.MessageType.UPDATE,
 				"read"
@@ -167,7 +166,7 @@ public class NotificationsServiceTest {
 	}
 
 	@Test
-	public void t02_canCreateAndReceiveNotification() throws IOException, EncodeException {
+	public void t02_canCreateAndReceiveNotification() throws IOException {
 		final String notifRecipient = "kiki";
 		final String notifBody = "hello there";
 		NotificationServiceMessage message = new NotificationServiceMessage(
@@ -185,7 +184,7 @@ public class NotificationsServiceTest {
 	}
 
 	@Test
-	public void t03_shouldReturnAllNotifications() throws IOException, EncodeException {
+	public void t03_shouldReturnAllNotifications() throws IOException {
 		NotificationServiceMessage message = new NotificationServiceMessage(
 				NotificationServiceMessage.MessageType.GET,
 				"all"
@@ -196,7 +195,7 @@ public class NotificationsServiceTest {
 	}
 
 	@Test
-	public void t04_shouldReturnRangeOfNotifications() throws IOException, EncodeException {
+	public void t04_shouldReturnRangeOfNotifications() throws IOException {
 		NotificationServiceMessage message = new NotificationServiceMessage(
 				NotificationServiceMessage.MessageType.GET,
 				"range 1-4"
@@ -207,7 +206,7 @@ public class NotificationsServiceTest {
 	}
 
 	@Test
-	public void t05_shouldDeleteAllNotificationsFromGivenUser() throws IOException, EncodeException {
+	public void t05_shouldDeleteAllNotificationsFromGivenUser() throws IOException {
 		NotificationServiceMessage message = new NotificationServiceMessage(
 				NotificationServiceMessage.MessageType.DELETE,
 				"all"
