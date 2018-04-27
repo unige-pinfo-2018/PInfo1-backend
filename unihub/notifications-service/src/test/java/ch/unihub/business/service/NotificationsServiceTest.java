@@ -84,7 +84,7 @@ public class NotificationsServiceTest {
 		return ShrinkWrap.create(WebArchive.class, "unihub-integration-test-notifications.war")
 				.addPackages(true, "ch.unihub")
 				.addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-				.setWebXML(new File("src/main/webapp/WEB-INF", "/web.xml"))
+				.setWebXML(new File("src/test/resources", "/web.xml"))
 				.addAsWebInfResource(new File("src/main/webapp/WEB-INF/ejb-jar.xml"), "ejb-jar.xml")
 				.addAsWebInfResource(new File("src/main/webapp/WEB-INF/jboss-web.xml"), "jboss-web.xml")
 				.addAsWebInfResource(new File("src/main/webapp/WEB-INF/shiro.ini"), "shiro.ini")
