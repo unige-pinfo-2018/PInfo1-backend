@@ -85,7 +85,8 @@ public interface PostService extends Serializable {
 
 	List getPostsAndCommentsByIds(List<Long> listIds);
 
-    List getSeveralPosts(int nbPost);
+	void addSQLForSearch();
+
 
 
 }

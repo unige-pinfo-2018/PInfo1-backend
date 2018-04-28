@@ -168,7 +168,11 @@ public class PostServiceImpl implements PostService {
 	public Long getReplyToIdPost(Long id)
 	{
 		Optional<Post> thePost = getPost(id);
-		return thePost.isPresent() ? thePost.get().getReplyToId() : 0;
+		if (thePost.isPresent()){
+			return thePost.get().getReplyToId();
+		} else {
+			return Long.parseLong(Integer.toString(0));
+		}
 	}
 
 	@Override
@@ -272,7 +276,7 @@ public class PostServiceImpl implements PostService {
         listTagsSql=listTagsSql.concat(") AND TAGS.POSTID = POSTS.ID ");
         if (listTags.size() == 0)
         {
-            listTagsSql=" ";
+            listTagsSql="";
         }
 
         String MatchQuestionSql;
@@ -280,11 +284,11 @@ public class PostServiceImpl implements PostService {
         if (QuestionUser == null)
         {
             MatchQuestionSql =" FROM POSTS ";
-            MatchQuestionSql2 ="ORDER BY POSTS.ID DESC LIMIT "+nbPost+";\n";
+            MatchQuestionSql2 ="ORDER BY POSTS.ID DESC LIMIT "+nbPost+";";
         }
         else {
             MatchQuestionSql= ", MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) AS score FROM POSTS ";
-            MatchQuestionSql2 = "AND MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) > 0 ORDER BY score DESC LIMIT "+nbPost+";\n";
+            MatchQuestionSql2 = "AND MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) > 0 ORDER BY score DESC LIMIT "+nbPost+";";
 
         }
 
@@ -388,40 +392,6 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
-	public List getSeveralPosts(int nbPost) {
-		int n = getNbPosts();
-		List res = new ArrayList<>();
-		List<Long> ids = new ArrayList<>();
-		if (n-nbPost > 0) {
-			if (n > 0) {
-				for (int i=n; i>=1; i--){
-					Optional<Post> p = getPost(Long.parseLong(Integer.toString(i)));
-					if (p.get().getParentId() == null) {
-						res.add(p.get());
-						ids.add(Long.parseLong(Integer.toString(i)));
-					}
-				}
-			}
-		}
-		res.add(getCommentsByQuestionID(ids));
-		return res;
-	}
-
-
-	/*
-	@Override
-    public Long addPostAndTag(Long userId, String content,String name,Long parentId)
-    {
-        Post post = new Post(userId,parentId,content);
-        addPost(post);
-
-        Long postId =post.getId();
-        Tag tag = new Tag((long) postId,name);
-        addTag(tag);
-        return postId;
-    }*/
-
-	@Override
     public void addTags(Long postId, List<String> lisName)
     {
         for (String aLisName : lisName) {
@@ -430,4 +400,10 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    public void addSQLForSearch()
+	{
+		entityManager.createNativeQuery("ALTER TABLE `POSTS` ADD FULLTEXT INDEX `POSTS_CONTENT_ft_index` (`CONTENT`);").executeUpdate();
+	}
+	//docker images
+	//$ docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
 }
