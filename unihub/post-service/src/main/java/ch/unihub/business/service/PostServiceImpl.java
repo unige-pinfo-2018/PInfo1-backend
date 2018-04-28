@@ -392,40 +392,6 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
-	public List getSeveralPosts(int nbPost) {
-		int n = getNbPosts();
-		List res = new ArrayList<>();
-		List<Long> ids = new ArrayList<>();
-		if (n-nbPost > 0) {
-			if (n > 0) {
-				for (int i=n; i>=1; i--){
-					Optional<Post> p = getPost(Long.parseLong(Integer.toString(i)));
-					if (p.get().getParentId() == null) {
-						res.add(p.get());
-						ids.add(Long.parseLong(Integer.toString(i)));
-					}
-				}
-			}
-		}
-		res.add(getCommentsByQuestionID(ids));
-		return res;
-	}
-
-
-	/*
-	@Override
-    public Long addPostAndTag(Long userId, String content,String name,Long parentId)
-    {
-        Post post = new Post(userId,parentId,content);
-        addPost(post);
-
-        Long postId =post.getId();
-        Tag tag = new Tag((long) postId,name);
-        addTag(tag);
-        return postId;
-    }*/
-
-	@Override
     public void addTags(Long postId, List<String> lisName)
     {
         for (String aLisName : lisName) {

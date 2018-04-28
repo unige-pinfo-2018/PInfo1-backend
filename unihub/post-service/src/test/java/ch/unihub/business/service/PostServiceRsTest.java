@@ -59,6 +59,10 @@ public class PostServiceRsTest {
 	private PostServiceRs sut;
 	@Inject
     private TagServiceRs tagService;
+    @Inject
+    private LikeServiceRs likeService;
+    @Inject
+    private DislikeServiceRs dislikeService;
 
     @Inject
     private PostService postServiceImp;
@@ -71,6 +75,10 @@ public class PostServiceRsTest {
         //need to do this in sql for search
         //sut.addSQLForSearch();
     }
+
+    /*
+     *      This part is for PostServiceRs
+     */
 
     @Test  
     public void t1_testEntityManagerInjected() {  
@@ -295,11 +303,71 @@ public class PostServiceRsTest {
 
         //verify if we have 18 in replytoid
         Assert.assertTrue((long)18 == (long)result.getEntity());
+    }
 
-        //        Post fakeQuestion = new Post((long) 1,"first question");
-        //        long idPost= (long)sut.addPost(fakeQuestion).getEntity();
-        //        Post fakeQuestion2 = new Post((long) 1,"question two");
-        //        sut.addPost(fakeQuestion2);
-        //        Tag tag=new Tag(idPost,"general");
+    /*
+     *      This part is for TagServiceRs
+     */
+
+    //addtags(long,list)
+    @Test
+    public void t20_verifyAddTags() throws URISyntaxException {
+        List<String> listTags=new ArrayList<String>();
+        listTags.add("tag1");
+        listTags.add("tag2");
+        listTags.add("tag3");
+
+        //verify if it create tags for posts = 1
+        Assert.assertEquals(201, tagService.addTags((long)1,listTags).getStatus());
+    }
+
+    //getTag(sring,string)
+    @Test
+    public void t21_verifyGetTag() throws URISyntaxException {
+        //verify if we have acces to the tag created in test "t20"
+        Assert.assertEquals(200, tagService.getTag("tag1","name").getStatus());
+    }
+
+
+    /*
+     *      This part is for LikeServiceRs
+     */
+
+    @Test
+    public void t22_verifyAddLike() throws URISyntaxException {
+        //crete a fake like
+        Like fakeLike=new Like();
+        fakeLike.setPostId((long)11);
+        fakeLike.setUserId((long)22);
+
+        //verify if it create like
+        Assert.assertEquals(201, likeService.addLike(fakeLike).getStatus());
+    }
+
+    @Test
+    public void t23_verifyGetLike() throws URISyntaxException {
+        //verify if we have acces to the like created in test "t20"
+        Assert.assertEquals(200, likeService.getLike((long)11,"postId").getStatus());
+    }
+
+    /*
+     *      This part is for DislikeServiceRs
+     */
+
+    @Test
+    public void t24_verifyAddDislike() throws URISyntaxException {
+        //crete a fake dislike
+        Dislike fakeDislike=new Dislike();
+        fakeDislike.setPostId((long)12);
+        fakeDislike.setUserId((long)23);
+
+        //verify if it create like
+        Assert.assertEquals(201, dislikeService.addDislike(fakeDislike).getStatus());
+    }
+
+    @Test
+    public void t25_verifyGetDislike() throws URISyntaxException {
+        //verify if we have acces to the dislike created in test "t24"
+        Assert.assertEquals(200, dislikeService.getDislike((long)12,"postId").getStatus());
     }
 }
