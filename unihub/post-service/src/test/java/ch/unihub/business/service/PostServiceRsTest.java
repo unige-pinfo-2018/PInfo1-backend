@@ -8,13 +8,13 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.Serializable;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import javax.ejb.EJBException;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
@@ -33,6 +33,9 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 import ch.unihub.dom.Post;
+import ch.unihub.dom.Tag;
+import ch.unihub.dom.Like;
+import ch.unihub.dom.Dislike;
 
 @RunWith(Arquillian.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -54,11 +57,19 @@ public class PostServiceRsTest {
 
 	@Inject
 	private PostServiceRs sut;
+	@Inject
+    private TagServiceRs tagService;
+
+    @Inject
+    private PostService postServiceImp;
 
     private final Post fakePost = new Post((long) 16,"fake text");
     @Before
     public void beforeTest() throws URISyntaxException {
         sut.addPost(fakePost);
+
+        //need to do this in sql for search
+        //sut.addSQLForSearch();
     }
 
     @Test  
@@ -171,4 +182,124 @@ public class PostServiceRsTest {
         Assert.assertEquals(200, sut.updatePost(post).getStatus());
     }
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
+
+    @Test
+    public void t13_searchPost() throws URISyntaxException {
+        //add two question and one with a tag
+        Post fakeQuestion = new Post((long) 1,"first question");
+        long idPost= (long)sut.addPost(fakeQuestion).getEntity();
+        Post fakeQuestion2 = new Post((long) 1,"question two");
+        sut.addPost(fakeQuestion2);
+        Tag tag=new Tag(idPost,"general");
+        tagService.addTag(tag);
+
+        //creat tag and question to test in search
+        List<String> listTags=new ArrayList<String>();
+        listTags.add("general");
+        List<String> nolistTags=new ArrayList<String>();
+        nolistTags.add("name not in db");
+
+
+
+        String questionUser = "question";
+        String noQuestion = null;
+        int nbPost=4;
+
+        //if i have a not question but a tag in db
+        Response requet = sut.searchPost(noQuestion,nbPost,listTags);
+        Assert.assertEquals(200, requet.getStatus());
+
+        //if i have a not question but a tag not in db
+        requet = sut.searchPost(noQuestion,nbPost,nolistTags);
+        Assert.assertEquals(404, requet.getStatus());
+    }
+
+    @Test
+    public void t14_getListPostWithIDs() throws URISyntaxException {
+        //add question
+        Post fakeQuestion = new Post((long) 1,"a question");
+        long idLastPost= (long)sut.addPost(fakeQuestion).getEntity();
+
+        //list of id
+        List<Long> listId= new ArrayList<>();
+        for (int i=1;i<=idLastPost;i++)
+        {
+            listId.add((long) i);
+        }
+
+        Response result = sut.getPostsByIds(listId);
+        Assert.assertEquals(200, result.getStatus());
+
+        //test if return all post
+        Assert.assertTrue(idLastPost == ((List)result.getEntity()).size());
+    }
+
+    @Test
+    public void t15_getPostsAndCommentsByTags() throws URISyntaxException {
+        //add two question and one with a tag
+        Post fakeQuestion = new Post((long) 1,"first question");
+        long idPost= (long)sut.addPost(fakeQuestion).getEntity();
+        Post fakeQuestion2 = new Post((long) 1,"question two");
+        sut.addPost(fakeQuestion2);
+        Tag tag=new Tag(idPost,"t15");
+        tagService.addTag(tag);
+
+        //creat tag and question to test in search
+        List<String> listTags=new ArrayList<String>();
+        listTags.add("t15");
+        List<String> nolistTags=new ArrayList<String>();
+        nolistTags.add("name not in db");
+
+        String noQuestion = null;
+        int nbPost=4;
+
+        Response result = sut.getPostsAndCommentsByTags(noQuestion,nbPost,listTags);
+        Assert.assertEquals(200, result.getStatus());
+    }
+
+    @Test
+    public void t16_getPostsAndCommentsByIds() throws URISyntaxException {
+        //verify if it return for the post 1
+        Assert.assertEquals(200, sut.getPostsAndCommentsByIds(Collections.singletonList((long) 1)).getStatus());
+    }
+
+    //getPostsOfUser(
+    @Test
+    public void t17_getPostsOfUser() throws URISyntaxException {
+        //verify if it return for the post 1
+        Assert.assertEquals(200, sut.getPostsOfUser(((long) 16)).getStatus());
+    }
+
+    //getCommentsByQuestionID
+    @Test
+    public void t18_getCommentsByQuestionIDandTheOneOfTheo() throws URISyntaxException {
+        //verify if it return for the post 1
+        Assert.assertEquals(200, sut.getCommentsByQuestionID(Collections.singletonList(((long) 1))).getStatus());
+        Assert.assertEquals(200, sut.getCommentsForPost(((long) 1)).getStatus());
+    }
+
+    @Test
+    public void t19_getReplyToIdPost() throws URISyntaxException {
+        //creat comment for post 1
+        Post fakeComment = new Post((long) 16,"fake text");
+        //set replytoid to 18
+        fakeComment.setReplyToId((long)18);
+        long idPost= (long) sut.addPost(fakeComment).getEntity();
+
+        //verify if it return for the comment creat
+        Response result = sut.getReplyToIdPost(idPost);
+        Assert.assertEquals(200, result.getStatus());
+
+        //verify if we have 18 in replytoid
+        Assert.assertTrue((long)18 == (long)result.getEntity());
+
+        //        Post fakeQuestion = new Post((long) 1,"first question");
+        //        long idPost= (long)sut.addPost(fakeQuestion).getEntity();
+        //        Post fakeQuestion2 = new Post((long) 1,"question two");
+        //        sut.addPost(fakeQuestion2);
+        //        Tag tag=new Tag(idPost,"general");
+    }
 }

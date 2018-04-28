@@ -1,5 +1,6 @@
 package ch.unihub.dom;
 
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -34,7 +35,7 @@ public class Post implements Serializable {
 
 	/** The user content */
 	@NotNull
-	@Size(min = 0, max = 400)
+	@Size(min = 2, max = 800)
 	@Column(name = "CONTENT")
 	private String content;
 

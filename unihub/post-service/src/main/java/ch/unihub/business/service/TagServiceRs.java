@@ -45,7 +45,7 @@ public class TagServiceRs
     @PUT
     @Path("/addTags")
     @Produces({ "application/json" })
-    public Response addTag(@QueryParam("postId") Long postId,@QueryParam("names") List<String> names) throws URISyntaxException {
+    public Response addTags(@QueryParam("postId") Long postId,@QueryParam("names") List<String> names) throws URISyntaxException {
         service.addTags(postId,names);
         return Response
                 .status(Response.Status.CREATED)

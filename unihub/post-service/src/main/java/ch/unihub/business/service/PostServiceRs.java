@@ -47,34 +47,25 @@ public class PostServiceRs {
         return postResponse(service.getPost(id));
     }
 
-	/* Returns 5 posts (or less if we reach the bottom of our DB) that are not comments */
-	// TODO = destroy this things
-	@GET
-	@Path("/contents")
-	@Produces({"application/json"})
-	public List getSeveralPosts() {
-		List<Post> p = service.getAll();
-		List<Long> ids = new ArrayList();
-		Collections.reverse(p);
-		for (ListIterator<Post> iter = p.listIterator(); iter.hasNext(); ) {
-			Post a = iter.next();
-			if (a.getParentId() != null) {
-				iter.remove();
-			} else {
-				ids.add(a.getId());
-			}
-		}
-		List res = new ArrayList();
-		res.add(p);
-		res.add(getCommentsByQuestionID(ids));
-		return res;
-	}
 
-	// TODO destroy also that
+	/* this function is not good and have a better function create for that : List<Post> getCommentsByID(long parentId)
+	* so for now i have just copy cat the code of the good function and transform the Long in List<Long>
+	*/
+	// TODO destroy that
 	@GET
 	@Path("/getCommentsForPost/{idPost}")
 	@Produces({ "application/json" })
 	public Response getCommentsForPost(@PathParam("idPost") Long idPost) {
+        List<Long> idPostList= new ArrayList<>();
+        idPostList.add(idPost);
+        List result = service.getCommentsByQuestionID(idPostList);
+        if (result != null) {
+            return Response.status(Response.Status.OK).entity(result).build();
+        }else
+        {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        /*
 		List<Response> list = new ArrayList<>();
 		int nbPosts = service.getNbPosts();
 		for (int i = 1; i <= nbPosts; i++) {
@@ -86,7 +77,7 @@ public class PostServiceRs {
 				}
 			}
 		}
-		return Response.ok(list).build();
+		return Response.ok(list).build();*/
 	}
 	
     @GET
@@ -106,8 +97,15 @@ public class PostServiceRs {
 	@GET
 	@Path("/replyToId_by_id/{id}")
 	@Produces({ "application/json" })
-	public Long getReplyToIdPost(@PathParam("id") Long id) {
-		return service.getReplyToIdPost(id);
+	public Response getReplyToIdPost(@PathParam("id") Long id) {
+        Long result = service.getReplyToIdPost(id);
+        if (result != null) {
+            return Response.status(Response.Status.OK).entity(result).build();
+        }else
+        {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+		//return service.getReplyToIdPost(id);
 	}
 
 	@GET
@@ -187,37 +185,72 @@ public class PostServiceRs {
 	@GET
 	@Path("/posts_by_ids")
 	@Produces({ "application/json" })
-	public List getPostsByIds(@QueryParam("id") List<Long> listId) {
-		return service.getPostsByIds(listId);
+	public Response getPostsByIds(@QueryParam("id") List<Long> listId) {
+        List result = service.getPostsByIds(listId);
+        if (result != null) {
+            return Response.status(Response.Status.OK).entity(result).build();
+        }else
+        {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+		//return service.getPostsByIds(listId);
 	}
 
 	@GET
 	@Path("/posts_and_comments_by_tags")
 	@Produces({"application/json"})
-	public List getPostsAndCommentsByTags(@QueryParam("q") String questionUser,@QueryParam("n") int nbPost,@QueryParam("t") List<String> listTags) {
-		return service.getPostsAndCommentsByTags(questionUser,nbPost,listTags);
+	public Response getPostsAndCommentsByTags(@QueryParam("q") String questionUser,@QueryParam("n") int nbPost,@QueryParam("t") List<String> listTags) {
+        List result = service.getPostsAndCommentsByTags(questionUser,nbPost,listTags);
+        if (result != null) {
+            return Response.status(Response.Status.OK).entity(result).build();
+        }else
+        {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+		//return service.getPostsAndCommentsByTags(questionUser,nbPost,listTags);
 	}
 
 	@GET
 	@Path("/posts_and_comments_by_ids")
 	@Produces({"application/json"})
-	public List getPostsAndCommentsByIds(@QueryParam("id") List<Long> listIds) {
-		return service.getPostsAndCommentsByIds(listIds);
+	public Response getPostsAndCommentsByIds(@QueryParam("id") List<Long> listIds) {
+        List result = service.getPostsAndCommentsByIds(listIds);
+        if (result != null) {
+            return Response.status(Response.Status.OK).entity(result).build();
+        }else
+        {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+		//return service.getPostsAndCommentsByIds(listIds);
 	}
 
 	@GET
     @Path("/getPostsOfUser/{idUser}")
     @Produces({ "application/json" })
-    public List<Post> getPostsOfUser(@PathParam("idUser") Long idUser) {
-        return service.getPostsOfUser(idUser);
+    public Response getPostsOfUser(@PathParam("idUser") Long idUser) {
+        List<Post> result = service.getPostsOfUser(idUser);
+        if (result != null) {
+            return Response.status(Response.Status.OK).entity(result).build();
+        }else
+        {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        //return service.getPostsOfUser(idUser);
     }
 
     //List<Post> getCommentsByID(long parentId)
     @GET
     @Path("/getComments_by_questionID")
     @Produces({ "application/json" })
-    public List getCommentsByQuestionID(@QueryParam("id") List<Long> listIds) {
-        return service.getCommentsByQuestionID(listIds);
+    public Response getCommentsByQuestionID(@QueryParam("id") List<Long> listIds) {
+        List result = service.getCommentsByQuestionID(listIds);
+        if (result != null) {
+            return Response.status(Response.Status.OK).entity(result).build();
+        }else
+        {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        //return service.getCommentsByQuestionID(listIds);
     }
 
 
@@ -234,4 +267,5 @@ public class PostServiceRs {
 				.contentLocation(new URI("posts/by_id/" + id.toString()))
 				.build();
 	}*/
+
 }

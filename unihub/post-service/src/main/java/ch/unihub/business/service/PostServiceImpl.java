@@ -168,7 +168,11 @@ public class PostServiceImpl implements PostService {
 	public Long getReplyToIdPost(Long id)
 	{
 		Optional<Post> thePost = getPost(id);
-		return thePost.isPresent() ? thePost.get().getReplyToId() : 0;
+		if (thePost.isPresent()){
+			return thePost.get().getReplyToId();
+		} else {
+			return Long.parseLong(Integer.toString(0));
+		}
 	}
 
 	@Override
@@ -430,4 +434,10 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    public void addSQLForSearch()
+	{
+		entityManager.createNativeQuery("ALTER TABLE `POSTS` ADD FULLTEXT INDEX `POSTS_CONTENT_ft_index` (`CONTENT`);").executeUpdate();
+	}
+	//docker images
+	//$ docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
 }

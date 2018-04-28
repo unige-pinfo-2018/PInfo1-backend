@@ -87,5 +87,8 @@ public interface PostService extends Serializable {
 
     List getSeveralPosts(int nbPost);
 
+	void addSQLForSearch();
+
+
 
 }
