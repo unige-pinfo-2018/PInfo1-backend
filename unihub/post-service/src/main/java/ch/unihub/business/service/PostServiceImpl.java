@@ -429,7 +429,7 @@ public class PostServiceImpl implements PostService {
 	public List getSeveralPosts()
 	{
 		String QuestionUser=null;
-		int nbPost=5;
+		int nbPost=getNbPosts();
 		List<String> listTags=new ArrayList<String>();
 
 		//need to add and remove item for having a list not null but with size = 0
@@ -439,7 +439,6 @@ public class PostServiceImpl implements PostService {
 		List postToFetch = searchPost(QuestionUser, nbPost, listTags);
 		List list = new ArrayList();
 		if (!postToFetch.isEmpty()) {
-
 			List listQuestion = getPostsByIds(postToFetch);
 			Collections.reverse(listQuestion);
 			list.add(listQuestion);
