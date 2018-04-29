@@ -20,8 +20,10 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 @Stateful
-@ServerEndpoint(value = "/notifications/{username}")
+@ServerEndpoint(value = "/notifications/{username}/{wsSessionId}")
 public class NotificationsService {
+
+    final static HashMap<String, String> usernamesWithSessionIds = new HashMap<>();
 
     private Logger logger = LoggerFactory.getLogger(NotificationsService.class);
 
@@ -35,11 +37,22 @@ public class NotificationsService {
     private EntityManager entityManager;
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("username") String username) {
-        // Get session and WebSocket connection
-        this.session = session;
-        sessions.add(session);
-        users.put(session.getId(), username);
+    public void onOpen(Session session,
+                       @PathParam("username") String username,
+                       @PathParam("wsSessionId") String websocketSessionId) throws IOException
+    {
+        // Only accepts connections with right credentials
+        /*if (usernamesWithSessionIds.containsKey(username) &&
+                usernamesWithSessionIds.get(username).equals(websocketSessionId))*/
+        if (true) {
+            // Get session and WebSocket connection
+            this.session = session;
+            sessions.add(session);
+            users.put(session.getId(), username);
+        } else {
+            logger.info(usernamesWithSessionIds.toString());
+            session.close();
+        }
     }
 
     @OnMessage
@@ -71,6 +84,9 @@ public class NotificationsService {
     @OnClose
     public void onClose(Session session) {
         // WebSocket connection closes
+        final String username = users.get(session.getId());
+        // Removes session id
+        usernamesWithSessionIds.remove(username);
         sessions.remove(session);
         users.remove(session.getId());
     }

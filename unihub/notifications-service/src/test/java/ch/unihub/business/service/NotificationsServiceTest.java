@@ -95,9 +95,9 @@ public class NotificationsServiceTest {
 
 	@Before
 	public void before() throws IOException {
-		notificationsService.onOpen(arthurSession, recipient);
+		notificationsService.onOpen(arthurSession, recipient, null);
 		// Creates 6 notifications for same user
-		notificationsService.onOpen(kikiSession, "kiki");
+		notificationsService.onOpen(kikiSession, "kiki", null);
 		for (int i = 0; i < 6; i++) {
 			final String content = "This is the body of notification " + (i + 1);
 			NotificationServiceMessage.CreateBody body = new NotificationServiceMessage.CreateBody(
