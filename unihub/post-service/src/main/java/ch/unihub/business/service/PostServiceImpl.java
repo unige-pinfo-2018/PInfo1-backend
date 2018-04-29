@@ -290,6 +290,7 @@ public class PostServiceImpl implements PostService {
             MatchQuestionSql= ", MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) AS score FROM POSTS ";
             MatchQuestionSql2 = "AND MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) > 0 ORDER BY score DESC LIMIT "+nbPost+";";
 
+
         }
 
         Query q = entityManager.createNativeQuery(
@@ -299,7 +300,26 @@ public class PostServiceImpl implements PostService {
                    "WHERE PARENTID IS NULL AND REPLYTOID IS NULL "+
                    MatchQuestionSql2);
 
-        return q.getResultList();
+
+		List result = q.getResultList();
+
+        //delete in the list "score" of "match against"
+		if (QuestionUser != null)
+		{
+			List resultWithoutScore= new ArrayList();
+
+			for (int i=0;i<result.size();i++)
+			{
+				Object[] sectionOFList= ((Object[]) result.get(i));
+				resultWithoutScore.add(sectionOFList[0]);
+			}
+			return resultWithoutScore;
+		}else
+		{
+
+			return result;
+		}
+
     }
 
     @Override
@@ -404,6 +424,28 @@ public class PostServiceImpl implements PostService {
 	{
 		entityManager.createNativeQuery("ALTER TABLE `POSTS` ADD FULLTEXT INDEX `POSTS_CONTENT_ft_index` (`CONTENT`);").executeUpdate();
 	}
-	//docker images
-	//$ docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
+
+	@Override
+	public List getSeveralPosts()
+	{
+		String QuestionUser=null;
+		int nbPost=5;
+		List<String> listTags=new ArrayList<String>();
+
+		//need to add and remove item for having a list not null but with size = 0
+		listTags.add("name at index 0");
+		listTags.remove(0);
+
+		List postToFetch = searchPost(QuestionUser, nbPost, listTags);
+		List list = new ArrayList();
+		if (!postToFetch.isEmpty()) {
+
+			List listQuestion = getPostsByIds(postToFetch);
+			Collections.reverse(listQuestion);
+			list.add(listQuestion);
+			list.add(getCommentsByQuestionID(postToFetch));
+		}
+		return list;
+
+	}
 }

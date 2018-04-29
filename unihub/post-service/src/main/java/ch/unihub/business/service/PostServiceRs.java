@@ -47,6 +47,20 @@ public class PostServiceRs {
         return postResponse(service.getPost(id));
     }
 
+    // Le retour de la fonction disparu
+    /* Returns 5 posts (or less if we reach the bottom of our DB) that are not comments with comments */
+    @GET
+    @Path("/contents")
+    @Produces({"application/json"})
+    public Response getSeveralPosts() {
+        List result = service.getSeveralPosts();
+        if (result != null) {
+            return Response.status(Response.Status.OK).entity(result).build();
+        }else
+        {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+    }
 
 	/* this function is not good and have a better function create for that : List<Post> getCommentsByID(long parentId)
 	* so for now i have just copy cat the code of the good function and transform the Long in List<Long>
