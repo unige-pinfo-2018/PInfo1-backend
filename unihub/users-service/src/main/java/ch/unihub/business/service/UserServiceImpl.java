@@ -21,12 +21,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * @author Arthur Deschamps
+ * @author PAUL
  */
 @Stateless
 public class UserServiceImpl implements UserService {
 	// The serial-id
-	private static final long serialVersionUID = 1386508985359072399L;
+	private static final long serialVersionUID = 1386509985359072399L;
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	@PersistenceContext

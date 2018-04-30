@@ -4,9 +4,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonArray;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.util.*;
 
@@ -122,13 +125,25 @@ public class PostServiceRs {
 		//return service.getReplyToIdPost(id);
 	}
 
-	@GET
-	@Path("/nbUpvotes_by_id/{idPost}")
+	@POST
+	@Path("/nbUpvotes_by_ids")
 	@Produces({ "application/json" })
-	public Response getNbUpvotes(@PathParam("idPost") Long idPost) {
-		return Response.status(Response.Status.OK).entity(service.getNbUpvotes(idPost)).build();
+    @Consumes("application/json")
+	public Response getNbUpvotes(@NotNull final String idPosts) {
+        final JsonArray postIds = Json.createReader(new StringReader(idPosts)).readObject().getJsonArray("idPosts");
+        return Response.ok(
+                postIds
+                        .stream()
+                        .map(id -> service.getNbUpvotes(Long.valueOf(id.toString())))
+                        // Discards null objects
+                        .filter(Objects::nonNull)
+                        // Hides passwords
+                        .toArray()
+        ).build();
+        //return Response.status(Response.Status.OK).entity(service.getNbUpvotes(idPosts)).build();
 		//return service.getNbUpvotes(idPost);
 	}
+
 
 	@GET
 	@Path("/date_by_id/{idPost}")

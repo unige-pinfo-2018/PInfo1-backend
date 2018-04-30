@@ -149,7 +149,7 @@ public class PostServiceRsTest {
     @Test
     public void t8_getNbUpvotesOfPostById() throws URISyntaxException {
         //verify if an answer
-        Assert.assertEquals(200, sut.getNbUpvotes((long) 1).getStatus());
+        Assert.assertEquals(200, sut.getNbUpvotes("{\n\t\"idPosts\": [1,1]\n}\n").getStatus());
     }
 
     @Test
