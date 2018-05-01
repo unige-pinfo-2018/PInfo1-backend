@@ -1,18 +1,16 @@
 language: java
 jdk: openjdk8
+
 addons:
   ssh_known_hosts: 129.194.69.128
+
 before_install:
 - mkdir /opt/docker-deploy
 - cd unihub/docker-config
 - cd ..
+- "./runDocker.sh"
 
-install: true
-
-
-script:
-- echo "skipping tests"
-
+install: mvn clean install
 
 before_deploy:
 - cd ..
@@ -24,9 +22,10 @@ before_deploy:
 deploy:
   provider: script
   skip_cleanup: true
-  script: rsync -r --delete-after --quiet unihub/pom.xml martijs0@129.194.69.128:/opt/docker-deploy/
+  script: rsync -r --delete-after --quiet `find /opt/docker-deploy/ -iname "*.war"` martijs0@129.194.69.128:/opt/docker-deploy/
   on:
     branch: travis-deploy
 
 after_success:
-- echo "yeaaah"
+- bash <(curl -s https://codecov.io/bash)
+
