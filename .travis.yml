@@ -7,10 +7,13 @@ addons:
 before_install:
 - mkdir /opt/docker-deploy
 - cd unihub/docker-config
-- "./runDocker.sh"
 - cd ..
+- touch /opt/docker-deploy/a.war
+- touch /opt/docker-deploy/b.war
+- touch /opt/docker-deploy/c.war
 
-install: mvn clean install
+install: trye
+script: echo "kldg"
 
 before_deploy:
 - cd ..
@@ -22,10 +25,10 @@ before_deploy:
 deploy:
   provider: script
   skip_cleanup: true
-  script: rsync -r --delete-after --quiet `find /opt/docker-deploy/ -iname "*.war"` martijs0@129.194.69.128:/opt/docker-deploy/
+  script: scp `find /opt/docker-deploy/ -iname "*.war"` martijs0@129.194.69.128:/opt/docker-deploy/
   on:
     branch: travis-deploy
 
 after_success:
-- bash <(curl -s https://codecov.io/bash)
+- echo "fd"
 
