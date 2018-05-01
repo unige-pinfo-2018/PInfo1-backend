@@ -187,7 +187,6 @@
 	</properties>
 	<modules>
 		<module>users-service</module>
-		<module>search-service</module>
-    <module>post-service</module>
+    		<module>post-service</module>
   </modules>
 </project>
