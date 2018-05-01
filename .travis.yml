@@ -6,7 +6,8 @@ before_install:
 - mkdir /opt/docker-deploy
 - cd unihub/docker-config
 - cd ..
-install: ls
+install:
+-
 before_deploy:
 - openssl aes-256-cbc -K $encrypted_706caab74578_key -iv $encrypted_706caab74578_iv -in deploy_rsa.enc -out /tmp/deploy_rsa -d
 - eval "$(ssh-agent -s)"
