@@ -8,7 +8,6 @@ before_install:
 - mkdir /opt/docker-deploy
 - cd unihub/docker-config
 - "./runDocker.sh"
-
 - cd ..
 - find . -type f -iname Cors* -exec sed -i 's/localhost/129.194.69.128/g' {} +
 
