@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Local
@@ -88,6 +89,8 @@ public interface PostService extends Serializable {
 	void addSQLForSearch();
 
 	List getSeveralPosts();
+
+	Map getLikeDislikeOfPostsFromUser(Long postId,Long userId);
 
 
 }

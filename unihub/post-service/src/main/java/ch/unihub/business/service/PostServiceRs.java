@@ -297,4 +297,27 @@ public class PostServiceRs {
 				.build();
 	}*/
 
+
+    // give for each posts in "idPosts" from a user a map of
+    // http://localhost:18080/post-service/rest/posts/likedislike_of_posts_from_userid/1
+    // {
+    //      "idPosts": [1,2,3]
+    // }
+    @POST
+    @Path("/likedislike_of_posts_from_userid/{userId}")
+    @Produces({ "application/json" })
+    @Consumes("application/json")
+    public Response getLikeDislikeOfPostsFromUser(@NotNull final String idPosts,@PathParam("userId") Long userId) {
+        final JsonArray postIds = Json.createReader(new StringReader(idPosts)).readObject().getJsonArray("idPosts");
+        return Response.ok(
+                postIds
+                        .stream()
+                        .map(id -> service.getLikeDislikeOfPostsFromUser(Long.valueOf(id.toString()),userId))
+                        // Discards null objects
+                        .filter(Objects::nonNull)
+                        // Hides passwords
+                        .toArray()
+        ).build();
+    }
+
 }
