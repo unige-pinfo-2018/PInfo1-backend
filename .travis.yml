@@ -7,8 +7,8 @@ addons:
 before_install:
 - mkdir /opt/docker-deploy
 - cd unihub/docker-config
-- cd ..
 - "./runDocker.sh"
+- cd ..
 
 install: mvn clean install
 
