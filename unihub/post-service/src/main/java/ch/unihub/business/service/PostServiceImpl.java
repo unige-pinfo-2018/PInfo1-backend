@@ -19,6 +19,9 @@ import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.util.*;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 @Stateless
 public class PostServiceImpl implements PostService {
 	// The serial-id
@@ -446,5 +449,46 @@ public class PostServiceImpl implements PostService {
 		}
 		return list;
 
+	}
+
+	@Override
+	public Map getLikeDislikeOfPostsFromUser(Long postId,Long userId)
+	{
+		Map result = new HashMap();
+		result.put("postId", postId.toString());
+
+		//want to know if the userId have done a like for this post
+		CriteriaBuilder qb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Like> cq = qb.createQuery(Like.class);
+
+		Root<Like> root = cq.from(Like.class);
+		Predicate idCond1 = qb.equal(root.get("postId"), postId);
+		Predicate idCond2 = qb.equal(root.get("userId"), userId);
+		cq.where(idCond1,idCond2);
+		TypedQuery<Like> query = entityManager.createQuery(cq);
+
+		long nbUpvotes = query.getResultList().size();
+		if (nbUpvotes==0) {
+			result.put("like", FALSE); }
+		else {
+			result.put("like", TRUE); }
+
+		//want to know if the userId have done a dislike for this post
+		CriteriaQuery<Dislike> cq2 = qb.createQuery(Dislike.class);
+
+		Root<Dislike> root2 = cq2.from(Dislike.class);
+		idCond1 = qb.equal(root2.get("postId"), postId);
+		idCond2 = qb.equal(root2.get("userId"), userId);
+		cq2.where(idCond1,idCond2);
+		TypedQuery<Dislike> query2 = entityManager.createQuery(cq2);
+
+		nbUpvotes = query2.getResultList().size();
+		if (nbUpvotes==0) {
+			result.put("dislike", FALSE); }
+		else {
+			result.put("dislike", TRUE); }
+
+
+		return result;
 	}
 }
