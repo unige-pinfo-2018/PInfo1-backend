@@ -12,7 +12,7 @@ before_install:
 - touch /opt/docker-deploy/b.war
 - touch /opt/docker-deploy/c.war
 
-install: trye
+install: true
 script: echo "kldg"
 
 before_deploy:
