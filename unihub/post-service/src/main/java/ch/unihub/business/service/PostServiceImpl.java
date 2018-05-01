@@ -16,6 +16,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.NotFoundException;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -129,14 +130,103 @@ public class PostServiceImpl implements PostService {
 
 	@Override
 	public void addLike(@NotNull Like newLike) {
-		newLike.setId(null);
-		entityManager.persist(newLike);
+
+        long userId = newLike.getUserId();
+        long postId = newLike.getPostId();
+
+        //see if user have already made a like for this post
+        CriteriaBuilder qb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Like> cq = qb.createQuery(Like.class);
+
+        Root<Like> root = cq.from(Like.class);
+        Predicate idCond1 = qb.equal(root.get("postId"), postId);
+        Predicate idCond2 = qb.equal(root.get("userId"), userId);
+        cq.where(idCond1,idCond2);
+        TypedQuery<Like> query = entityManager.createQuery(cq);
+
+        //si il y pas de like alors ajouter sinon enlever
+        if (query.getResultList().size() == 0) {
+            newLike.setId(null);
+            entityManager.persist(newLike);
+
+            //see if user have already made a dislike for this post
+            CriteriaBuilder qb2 = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Dislike> cq2 = qb2.createQuery(Dislike.class);
+            Root<Dislike> root2 = cq2.from(Dislike.class);
+            idCond1 = qb2.equal(root2.get("postId"), postId);
+            idCond2 = qb2.equal(root2.get("userId"), userId);
+            cq2.where(idCond1,idCond2);
+            TypedQuery<Dislike> query2 = entityManager.createQuery(cq2);
+
+            //si il y a un dislike alors l'enlever
+            if (query2.getResultList().size() >= 1)
+            {
+                CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+                CriteriaDelete<Dislike> delete = cb.createCriteriaDelete(Dislike.class);
+                root2 = delete.from(Dislike.class);
+                delete.where(qb.equal(root2.get("userId"), userId),qb.equal(root2.get("postId"), postId));
+                entityManager.createQuery(delete).executeUpdate();
+            }
+        }else
+        {
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaDelete<Like> delete = cb.createCriteriaDelete(Like.class);
+
+            root = delete.from(Like.class);
+            delete.where(qb.equal(root.get("userId"), userId),qb.equal(root.get("postId"), postId));
+            entityManager.createQuery(delete).executeUpdate();
+        }
 	}
 
 	@Override
 	public void addDislike(@NotNull Dislike newDislike) {
-		newDislike.setId(null);
-		entityManager.persist(newDislike);
+        long userId = newDislike.getUserId();
+        long postId = newDislike.getPostId();
+
+        //see if user have already made a dislike for this post
+        CriteriaBuilder qb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Dislike> cq = qb.createQuery(Dislike.class);
+
+        Root<Dislike> root = cq.from(Dislike.class);
+        Predicate idCond1 = qb.equal(root.get("postId"), postId);
+        Predicate idCond2 = qb.equal(root.get("userId"), userId);
+        cq.where(idCond1,idCond2);
+        TypedQuery<Dislike> query = entityManager.createQuery(cq);
+
+        //si il y pas de dislike alors ajouter sinon enlever
+        if (query.getResultList().size() == 0) {
+            newDislike.setId(null);
+            entityManager.persist(newDislike);
+
+            //see if user have already made a like for this post
+            CriteriaBuilder qb2 = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Like> cq2 = qb2.createQuery(Like.class);
+            Root<Like> root2 = cq2.from(Like.class);
+            idCond1 = qb2.equal(root2.get("postId"), postId);
+            idCond2 = qb2.equal(root2.get("userId"), userId);
+            cq2.where(idCond1,idCond2);
+            TypedQuery<Like> query2 = entityManager.createQuery(cq2);
+
+            //si il y a un like alors l'enlever
+
+            if (query2.getResultList().size() >= 1)
+            {
+                CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+                CriteriaDelete<Like> delete = cb.createCriteriaDelete(Like.class);
+                root2 = delete.from(Like.class);
+                delete.where(qb.equal(root2.get("userId"), userId),qb.equal(root2.get("postId"), postId));
+                entityManager.createQuery(delete).executeUpdate();
+            }
+        }else
+        {
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaDelete<Dislike> delete = cb.createCriteriaDelete(Dislike.class);
+
+            Root<Dislike> root2 = delete.from(Dislike.class);
+            delete.where(cb.equal(root2.get("userId"), userId),cb.equal(root2.get("postId"), postId));
+            if (entityManager.createQuery(delete).executeUpdate() < 1)
+                throw new NotFoundException("Error");
+        }
 	}
 
 	@Override

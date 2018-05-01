@@ -46,7 +46,6 @@ public class LikeServiceRs
         service.addLike(like);
         return Response
                 .status(Response.Status.CREATED)
-                .contentLocation(new URI("likes/by_id/" + like.getId().toString()))
                 .build();
     }
 }

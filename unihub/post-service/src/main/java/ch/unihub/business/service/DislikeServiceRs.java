@@ -47,7 +47,6 @@ public class DislikeServiceRs
         service.addDislike(dislike);
         return Response
                 .status(Response.Status.CREATED)
-                .contentLocation(new URI("dislikes/by_id/" + dislike.getId().toString()))
                 .build();
     }
 }

@@ -125,20 +125,41 @@ public class PostServiceRs {
 		//return service.getReplyToIdPost(id);
 	}
 
+
+
+
+    // give for each posts in "idPosts" from a user a list with
+    //      a list of nbUpvote for each postId
+    //      a map with like and dislike for each post from an userId
+    // http://localhost:18080/post-service/rest/posts/likedislike_of_posts_from_userid/1
+    // {
+    //      "idPosts": [1,2,3]
+    // }
 	@POST
-	@Path("/nbUpvotes_by_ids")
+	@Path("/nbUpvotes_by_ids/{userId}")
 	@Produces({ "application/json" })
     @Consumes("application/json")
-	public Response getNbUpvotes(@NotNull final String idPosts) {
+	public Response getNbUpvotes(@NotNull final String idPosts,@PathParam("userId") Long userId) {
         final JsonArray postIds = Json.createReader(new StringReader(idPosts)).readObject().getJsonArray("idPosts");
-        return Response.ok(
+        List result=new ArrayList();
+        result.add(
                 postIds
                         .stream()
                         .map(id -> service.getNbUpvotes(Long.valueOf(id.toString())))
                         // Discards null objects
                         .filter(Objects::nonNull)
                         // Hides passwords
-                        .toArray()
+                        .toArray());
+        result.add(
+                postIds
+                        .stream()
+                        .map(id -> service.getLikeDislikeOfPostsFromUser(Long.valueOf(id.toString()),userId))
+                        // Discards null objects
+                        .filter(Objects::nonNull)
+                        // Hides passwords
+                        .toArray());
+        return Response.ok(
+                result
         ).build();
         //return Response.status(Response.Status.OK).entity(service.getNbUpvotes(idPosts)).build();
 		//return service.getNbUpvotes(idPost);
@@ -298,26 +319,6 @@ public class PostServiceRs {
 	}*/
 
 
-    // give for each posts in "idPosts" from a user a map of
-    // http://localhost:18080/post-service/rest/posts/likedislike_of_posts_from_userid/1
-    // {
-    //      "idPosts": [1,2,3]
-    // }
-    @POST
-    @Path("/likedislike_of_posts_from_userid/{userId}")
-    @Produces({ "application/json" })
-    @Consumes("application/json")
-    public Response getLikeDislikeOfPostsFromUser(@NotNull final String idPosts,@PathParam("userId") Long userId) {
-        final JsonArray postIds = Json.createReader(new StringReader(idPosts)).readObject().getJsonArray("idPosts");
-        return Response.ok(
-                postIds
-                        .stream()
-                        .map(id -> service.getLikeDislikeOfPostsFromUser(Long.valueOf(id.toString()),userId))
-                        // Discards null objects
-                        .filter(Objects::nonNull)
-                        // Hides passwords
-                        .toArray()
-        ).build();
-    }
+
 
 }
