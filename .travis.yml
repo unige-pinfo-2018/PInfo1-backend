@@ -23,9 +23,7 @@ before_deploy:
 deploy:
   provider: script
   skip_cleanup: true
-  script: scp pom.xml martijs0@129.194.69.128:/opt/docker-deploy/
-  on:
-    branch: master
+  script: rsync -r --delete-after --quiet pom.xml martijs0@129.194.69.128:/opt/docker-deploy/
 
 after_success:
 - echo "yeaaah"
