@@ -23,7 +23,7 @@ before_deploy:
 deploy:
   provider: script
   skip_cleanup: true
-  script: find /opt/docker-deploy/ -iname "*.war" -exec scp '{}' martijs0@129.194.69.128:/opt/docker-deploy/ ';'
+  script: ssh martijs0@129.194.69.128 rm -f /opt/docker-deploy/* && find /opt/docker-deploy/ -iname "*.war" -exec scp '{}' martijs0@129.194.69.128:/opt/docker-deploy/ ';'
   on:
     branch: master
 
