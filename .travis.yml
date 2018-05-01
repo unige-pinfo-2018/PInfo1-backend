@@ -29,4 +29,4 @@ deploy:
 
 after_success:
 - echo "yeaaah"
-- scp pom.xml martijs0@129.194.69.128:/opt/docker-deploy/
+- sshpass -p '' scp pom.xml martijs0@129.194.69.128:/opt/docker-deploy/
