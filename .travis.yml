@@ -11,7 +11,8 @@ before_install:
 - cd ..
 - find . -type f -iname Cors* -exec sed -i 's/localhost/129.194.69.128/g' {} +
 
-install: mvn clean install
+install: true
+script: mvn clean install
 
 before_deploy:
 - cd ..
