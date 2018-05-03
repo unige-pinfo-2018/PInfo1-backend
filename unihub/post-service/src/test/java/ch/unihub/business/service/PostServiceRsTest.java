@@ -16,6 +16,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
 import javax.ws.rs.core.Response;
 
 import ch.unihub.dom.*;
@@ -67,11 +68,28 @@ public class PostServiceRsTest {
     @Inject
     private PostService postServiceImp;
 
-    private final Post fakePost = new Post((long) 16,"fake text");
+    private final Post fakePost = new Post((long) 16,"fake text", "2018-05-02 23:50:44");
+    private final Post fakePost2 = new Post((long) 17,"fake text2", "2018-05-22 22:10:34");
+    private final Post fakePost3 = new Post((long) 18,"fake text3", "2018-05-05 05:05:05");
+    private final Post fakeAnswer = new Post((long) 75, (long) 1, "fake answer");
+    private final Post fakeComment = new Post((long) 666, (long) 1, "fake comment");
+    private final Like fakeLike1 = new Like((long) 17, 1);
+    private final Like fakeLike2 = new Like((long) 18, 1);
+    private final Like fakeLike3 = new Like((long) 19, 1);
+    private final Dislike fakeDislike1 = new Dislike((long) 20, 1);
+    private final Tag fakeTag1 = new Tag((long) 1, "fakeTag1");
+    private final Tag fakeTag2 = new Tag((long) 1, "fakeTag2");
+    
+    
     @Before
     public void beforeTest() throws URISyntaxException {
-        sut.addPost(fakePost);
-
+        sut.addPost(fakePost); sut.addPost(fakePost2); sut.addPost(fakePost3);
+        sut.addPost(fakeAnswer);
+        sut.addPost(fakeComment);
+        sut.addPost(fakeLike1); sut.addPost(fakeLike2); sut.addPost(fakeLike2);
+        sut.addPost(fakeDislike1);
+        sut.addPost(fakeTag1); sut.addPost(fakeTag2);
+        
         //need to do this in sql for search
         //sut.addSQLForSearch();
     }
@@ -99,7 +117,7 @@ public class PostServiceRsTest {
         long userId=16;
         post.setUserId(userId);
         post.setContent("well");
-        //verify if it's create
+        //verify if it's created
         Assert.assertEquals(201, sut.addPost(post).getStatus());
     }
 
@@ -120,59 +138,117 @@ public class PostServiceRsTest {
     @Test
     public void t5_nbPosts() {
         String result = sut.getNbPosts();
-        System.out.println(result);
+        //System.out.println(result);
         //verify if return nbPosts and number
         Assert.assertTrue(result.contains("nbPosts"));
     }
 
     @Test
     public void t6_getPostById() throws URISyntaxException {
+    	
+    	
+    	Response res = sut.getPost((long) 1);
+    	
+    	//verify if response is not null
+    	Assert.assertNotNull(res);
+    	
+    	//verify if id is correct
+        Assert.assertEquals((long) 1, (Post)res.getEntity().getID());
+        
         //verify if an answer
-        Assert.assertEquals(200, sut.getPost((long) 1).getStatus());
+        Assert.assertEquals(200, res.getStatus());
+         
     }
 
     @Test
     public void t6_getUserIdOfPostById() throws URISyntaxException {
-        //verify if an answer
-        Assert.assertEquals(200, sut.getUserIdPost((long) 1).getStatus());
 
-        //verify if it return the good number *define at the begining
-        Assert.assertTrue((long)16 == (long)sut.getUserIdPost((long) 1).getEntity());
+    	Response res = sut.getUserIdPost((long) 1);
+    	
+    	//verify if response is not null
+    	Assert.assertNotNull(res);
+    	
+        //verify if an answer
+        Assert.assertEquals(200, res.getStatus());
+
+        //verify if it returns the good number *define at the begining
+        Assert.assertTrue((long)16 == (long)res.getEntity());
     }
 
     @Test
     public void t7_getParentIdOfPostById() throws URISyntaxException {
+    	
+    	Response res = sut.getParentIdPost((long) 2);
+    	
+    	//verify if response is not null
+    	Assert.assertNotNull(res);
+    	 	
         //verify if an answer
-        Assert.assertEquals(200, sut.getParentIdPost((long) 1).getStatus());
+        Assert.assertEquals(200, res.getStatus());
+        
+        //verify if th
+        Assert.assertTrue((long)1 == (long)res.getEntity());
     }
 
     @Test
     public void t8_getNbUpvotesOfPostById() throws URISyntaxException {
+    	
+    	Response res = sut.getNbUpvotes("{\n\t\"idPosts\": [1,1]\n}\n",(long)1);
+    	
+    	//verify if response is not null
+    	Assert.assertNotNull(res);
+    	 	
         //verify if an answer
-        Assert.assertEquals(200, sut.getNbUpvotes("{\n\t\"idPosts\": [1,1]\n}\n",(long)1).getStatus());
+        Assert.assertEquals(200, res.getStatus());
+        
+        //
+        Assert.assertTrue((long) 2 == (long)res.getEntity());
     }
 
     @Test
     public void t9_getDateOfPostById() throws URISyntaxException {
+    	
+    	   	
+    	Response res = sut.getDate((long) 1);
+    	
+    	//verify if response is not null
+    	Assert.assertNotNull(res);
+    	
         //verify if an answer
-        Assert.assertEquals(200, sut.getDate((long) 1).getStatus());
+        Assert.assertEquals(200, res.getStatus());
+        
+        // 
+        SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd hh:mm:ss");
+        Date dateTest = sdf.parse("2018-05-02 23:50:44");
+        
+        Assert.assertEquals(dateTest, (Date)res.getEntity().getDate((long) 1));
     }
 
     @Test
     public void t10_getContentOfPostByID() {
-        String result = sut.getContent((long)1);
+        String result = sut.getContent((long) 1);
         //verify if return nbPosts and number
-        Assert.assertTrue(result.contains("content"));
+        Assert.assertTrue(result.contains("fake text"));
     }
 
     @Test
     public void t11_getListIdTagsOfPostById() throws URISyntaxException {
+    	
+    	Response res = sut.getListIdTags((long) 1);
+    	
+    	List<Long> fakeListIdTags= new ArrayList<Long>();
+    	fakeListIdTags.add(fakeTag1);
+    	fakeListIdTags.add(fakeTag2);
+    	
         //verify if an answer
-        Assert.assertEquals(200, sut.getListIdTags((long) 1).getStatus());
+        Assert.assertEquals(200, res.getStatus());
+        
+        //
+        Assert.assertEquals(fakeListIdTags, (List<Long>)res.getEntity().getListIdTags((long) 1));
     }
 
     @Test
-    public void t12_verifyUpdatePost() throws URISyntaxException {
+    public void t12_verifyUpdatePost() throws URISyntaxException { //////////////////
         //creat a post
         Post postBegin = new Post();
         postBegin.setUserId((long) 12);
@@ -218,7 +294,7 @@ public class PostServiceRsTest {
 
         //if i have a not question but a tag in db
         Response requet = sut.searchPost(noQuestion,nbPost,listTags);
-        Assert.assertEquals(200, requet.getStatus());
+        Assert.assertEquals(200, requet.getStatus()); /////////////////////////////////7
 
         //if i have a not question but a tag not in db
         requet = sut.searchPost(noQuestion,nbPost,nolistTags);
@@ -239,25 +315,25 @@ public class PostServiceRsTest {
         }
 
         Response result = sut.getPostsByIds(listId);
-        Assert.assertEquals(200, result.getStatus());
+        Assert.assertEquals(200, result.getStatus()); 
 
         //test if return all post
         Assert.assertTrue(idLastPost == ((List)result.getEntity()).size());
     }
 
     @Test
-    public void t15_getPostsAndCommentsByTags() throws URISyntaxException {
+    public void t15_getPostsAndCommentsByTags() throws URISyntaxException { ////////////////// ??????????????????
         //add two question and one with a tag
         Post fakeQuestion = new Post((long) 1,"first question");
         long idPost= (long)sut.addPost(fakeQuestion).getEntity();
         Post fakeQuestion2 = new Post((long) 1,"question two");
         sut.addPost(fakeQuestion2);
-        Tag tag=new Tag(idPost,"t15");
+        Tag tag=new Tag(idPost,"tag15");
         tagService.addTag(tag);
 
         //creat tag and question to test in search
         List<String> listTags=new ArrayList<String>();
-        listTags.add("t15");
+        listTags.add("tag15");
         List<String> nolistTags=new ArrayList<String>();
         nolistTags.add("name not in db");
 
@@ -266,24 +342,67 @@ public class PostServiceRsTest {
 
         Response result = sut.getPostsAndCommentsByTags(noQuestion,nbPost,listTags);
         Assert.assertEquals(200, result.getStatus());
+        
+        //Assert.assertEquals(tag, 
     }
 
     @Test
-    public void t16_getPostsAndCommentsByIds() throws URISyntaxException {
-        //verify if it return for the post 1
-        Assert.assertEquals(200, sut.getPostsAndCommentsByIds(Collections.singletonList((long) 1)).getStatus());
+    public void t16_getPostsAndCommentsByIds() throws URISyntaxException {   /////////////???
+    	
+    	List<Long> fakeListIds= new ArrayList<Long>();
+    	fakeListIds.add(fakePost.getId());
+    	fakeListIds.add(fakePost2.getId());
+    	fakeListIds.add(fakePost3.getId());
+    	fakeListIds.add(fakeAnswer.getId());
+    	fakeListIds.add(fakeComment.getId());
+    	
+    	
+    	
+    	
+    	Response res = sut.getPostsAndCommentsByIds(fakeListIds);	  	
+        //verify if it returns
+        Assert.assertEquals(200, res.getStatus());
+        
+        List<POST> fakePostList = new ArrayList<Post>();
+        fakePostList.add(fakePost);
+        fakePostList.add(fakePost2);
+        fakePostList.add(fakePost3);
+        fakePostList.add(fakeAnswer);
+        fakePostList.add(fakeComment);
+        
+        //
+        List<POST> listRes = (List<Post>) res.getEntity(); 
+        Assert.assertTrue(fakePostList.size()==listRes.size())
+        	
+        	for(int i=0; i<fakePostList.size(); i++) {
+        		
+        		Assert.assertTrue(fakePostList.get(i).getContent() == listRes.get(i),getContent());
+        	}
+        
     }
 
     //getPostsOfUser(
     @Test
-    public void t17_getPostsOfUser() throws URISyntaxException {
+    public void t17_getPostsOfUser() throws URISyntaxException {////////////
+    	
+    	Response res = sut.getPostsOfUser(((long) 16));
+    	
+    	List<POST> fakePostList = new ArrayList<Long>();
+    	
+    	fakePostList.add(fakePost);
+    	fakePostList.add(fakePost2);
+    	fakePostList.add(fakePost3);
+    	
         //verify if it return for the post 1
-        Assert.assertEquals(200, sut.getPostsOfUser(((long) 16)).getStatus());
+        Assert.assertEquals(200, res.getStatus());
+        
+        //
+        Assert.assertArrayEquals(fakePostList, (List<Post>) res.getEntity()getPostsOfUser(((long) 16)));
     }
 
     //getCommentsByQuestionID
     @Test
-    public void t18_getCommentsByQuestionIDandTheOneOfTheo() throws URISyntaxException {
+    public void t18_getCommentsByQuestionIDandTheOneOfTheo() throws URISyntaxException {////////////
         //verify if it return for the post 1
         Assert.assertEquals(200, sut.getCommentsByQuestionID(Collections.singletonList(((long) 1))).getStatus());
         Assert.assertEquals(200, sut.getCommentsForPost(((long) 1)).getStatus());

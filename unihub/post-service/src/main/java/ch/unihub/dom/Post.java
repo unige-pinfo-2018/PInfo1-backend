@@ -57,6 +57,21 @@ public class Post implements Serializable {
 		this.setContent(content);
 	}
 
+	// Constructor used fto test date
+	public Post(Long userId, String content, Date datePost) {
+		this.setUserId(userId);
+		this.setContent(content);
+		this.setDatePost(datePost);
+	}
+	
+	// Constructor used to test comments
+	public Post(Long userId, Long replyToId, String content) {
+		this.setUserId(userId);
+		this.setReplyToId(replyToId);
+		this.setContent(content);
+	}
+	
+	
 	public void copyFields(final Post post) {
 		if (post.getUserId() != null)
 			this.setUserId(post.getUserId());

@@ -32,6 +32,11 @@ public class Like implements Serializable  {
     @NotNull
     @Column(name = "POSTID")
     private Long postId;
+    
+    public Like(long userId,lon postId) {
+    	this.setUserId(userId);
+    	this.setPostId(postId);
+    }
 
     public final Long getId() {
         return id;

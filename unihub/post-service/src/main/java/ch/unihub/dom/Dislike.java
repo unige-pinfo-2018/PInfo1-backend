@@ -33,6 +33,11 @@ public class Dislike implements Serializable {
     @NotNull
     @Column(name = "POSTID")
     private Long postId;
+    
+    public Dislike(long userId, long postId) {
+    	this.setUserId(userId);
+    	this.setPostId(postId);
+    }
 
     public final Long getId() {
         return id;
