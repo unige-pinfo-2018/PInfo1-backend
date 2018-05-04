@@ -7,7 +7,7 @@
     <parent>
 		<artifactId>unihub</artifactId>
 		<groupId>ch.ranters.unihub</groupId>
-		<version>0.0.2-SNAPSHOT</version>
+		<version>1.0.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
     <artifactId>post-service</artifactId>
