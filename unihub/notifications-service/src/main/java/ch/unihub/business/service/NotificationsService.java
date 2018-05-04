@@ -42,15 +42,15 @@ public class NotificationsService {
                        @PathParam("wsSessionId") String websocketSessionId) throws IOException
     {
         // Only accepts connections with right credentials
-        /*if (usernamesWithSessionIds.containsKey(username) &&
-                usernamesWithSessionIds.get(username).equals(websocketSessionId))*/
-        if (true) {
+        if (usernamesWithSessionIds.containsKey(username) &&
+                usernamesWithSessionIds.get(username).equals(websocketSessionId)) {
             // Get session and WebSocket connection
             this.session = session;
             sessions.add(session);
             users.put(session.getId(), username);
         } else {
             logger.info(usernamesWithSessionIds.toString());
+            session.getBasicRemote().sendText("Unauthorized");
             session.close();
         }
     }

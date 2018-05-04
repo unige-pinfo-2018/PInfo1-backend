@@ -24,6 +24,8 @@ public class NotificationsAuthenticatorRs {
     @Produces("application/json")
     public Response getWebsocketSessionId() {
         final String sessionId = UUID.randomUUID().toString();
+        // Will probably never be null since accessing this url requires to be logged in, but we
+        // never know
         final String username = (String) SecurityUtils.getSubject().getPrincipal();
         if (username == null) return Response.status(Response.Status.UNAUTHORIZED).build();
         // Removes potentially already existing ids
