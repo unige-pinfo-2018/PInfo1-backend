@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0"
+	xmlns="http://java.sun.com/xml/ns/persistence">
+	<persistence-unit name="unihub-pu"
+		transaction-type="JTA">
+
+
+		<jta-data-source>UNIHUBDS</jta-data-source>
+
+		<class>ch.unihub.dom.Notification</class>
+		<properties>
+			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
+		</properties>
+	</persistence-unit>
+</persistence>
