@@ -23,6 +23,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @ServerEndpoint(value = "/notifications/{username}/{wsSessionId}")
 public class NotificationsService {
 
+    public final static String UNAUTHORIZED = "Unauthorized";
     final static HashMap<String, String> usernamesWithSessionIds = new HashMap<>();
 
     private Logger logger = LoggerFactory.getLogger(NotificationsService.class);
@@ -50,7 +51,7 @@ public class NotificationsService {
             users.put(session.getId(), username);
         } else {
             logger.info(usernamesWithSessionIds.toString());
-            session.getBasicRemote().sendText("Unauthorized");
+            session.getBasicRemote().sendText(UNAUTHORIZED);
             session.close();
         }
     }

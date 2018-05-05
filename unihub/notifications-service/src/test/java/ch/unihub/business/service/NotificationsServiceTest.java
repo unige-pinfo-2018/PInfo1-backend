@@ -34,8 +34,11 @@ public class NotificationsServiceTest {
 	private static Session kikiSession;
 	private static Session arthurSession;
 	private final static String recipient = "arthur";
+	private final static String initiator = "kiki";
 	private static List<Notification> receivedNotifications = new ArrayList<>();
 	private static Notification hotNotification;
+	// If the user was denied at websocket connection
+	private static boolean beenDenied = false;
 
 	private final static Logger logger = LoggerFactory.getLogger(NotificationsServiceTest.class);
 
@@ -46,6 +49,10 @@ public class NotificationsServiceTest {
 		Mockito.doAnswer(
 				(Answer<Void>) invocationOnMock -> {
 					Object arg = invocationOnMock.getArguments()[0];
+					if ((arg instanceof String) && arg.equals(NotificationsService.UNAUTHORIZED)) {
+						beenDenied = true;
+						return null;
+					}
 					try {
 						// Multiple notifications: probably a GET request
 						Notification[] notifications = gson.fromJson((String) arg, Notification[].class);
@@ -64,7 +71,7 @@ public class NotificationsServiceTest {
 
 	static {
 		try {
-			kikiSession = createMockSession("kiki");
+			kikiSession = createMockSession(initiator);
 			arthurSession = createMockSession(recipient);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -95,9 +102,13 @@ public class NotificationsServiceTest {
 
 	@Before
 	public void before() throws IOException {
-		notificationsService.onOpen(arthurSession, recipient, null);
+		// Registers users in the notifications websocket service
+		NotificationsService.usernamesWithSessionIds.put(recipient, recipient);
+		NotificationsService.usernamesWithSessionIds.put(initiator, initiator);
+		// Opens connections
+		notificationsService.onOpen(arthurSession, recipient, recipient);
 		// Creates 6 notifications for same user
-		notificationsService.onOpen(kikiSession, "kiki", null);
+		notificationsService.onOpen(kikiSession, initiator, initiator);
 		for (int i = 0; i < 6; i++) {
 			final String content = "This is the body of notification " + (i + 1);
 			NotificationServiceMessage.CreateBody body = new NotificationServiceMessage.CreateBody(
@@ -124,6 +135,7 @@ public class NotificationsServiceTest {
 		notificationsService.onMessage(kikiSession, deleteAll);
 		notificationsService.onClose(kikiSession);
 		notificationsService.onClose(arthurSession);
+		beenDenied = false;
 	}
 
 	@Test
@@ -217,5 +229,19 @@ public class NotificationsServiceTest {
 				"all"
 		)));
 		Assert.assertEquals(0, receivedNotifications.size());
+	}
+
+	@Test
+	public void t06_shouldNotAuthorizeWrongWebsocketSessionId() throws IOException {
+		Assert.assertFalse(beenDenied);
+		notificationsService.onOpen(arthurSession, recipient, "");
+		Assert.assertTrue(beenDenied);
+	}
+
+	@Test
+	public void t07_shouldNotAuthorizeWrongUsername() throws IOException {
+		Assert.assertFalse(beenDenied);
+		notificationsService.onOpen(arthurSession, recipient + "_wrong", recipient);
+		Assert.assertTrue(beenDenied);
 	}
 }
