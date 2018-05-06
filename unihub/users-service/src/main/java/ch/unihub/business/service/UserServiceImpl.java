@@ -4,8 +4,6 @@ package ch.unihub.business.service;
 import ch.unihub.dom.AccountConfirmation;
 import ch.unihub.dom.ResetPasswordRequest;
 import ch.unihub.dom.User;
-import org.apache.shiro.authc.credential.DefaultPasswordService;
-import org.apache.shiro.authc.credential.PasswordService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
