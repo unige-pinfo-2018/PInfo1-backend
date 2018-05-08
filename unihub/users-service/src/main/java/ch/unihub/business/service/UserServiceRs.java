@@ -44,6 +44,7 @@ public class UserServiceRs {
 
 	@GET
 	@Path("/nbUsers")
+	@Consumes("application/json")
 	@Produces({ "application/json" })
 	public String getNbUsers() {
 		return "{\"nbUsers\":\"" + service.getNbUsers() + "\"}";
