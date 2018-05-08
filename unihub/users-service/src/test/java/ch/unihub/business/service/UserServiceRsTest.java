@@ -54,7 +54,7 @@ public class UserServiceRsTest {
 				.setWebXML(new File("src/main/webapp/WEB-INF", "/web.xml"))
 				.addAsWebInfResource(new File("src/main/webapp/WEB-INF/ejb-jar.xml"), "ejb-jar.xml")
 				.addAsWebInfResource(new File("src/main/webapp/WEB-INF/jboss-web.xml"), "jboss-web.xml")
-				.addAsWebInfResource(new File("src/main/webapp/WEB-INF/shiro.ini"), "shiro.ini")
+				.addAsWebInfResource(new File("src/test/resources/shiro.ini"), "shiro.ini")
 				.addAsResource("test-persistence.xml", "META-INF/persistence.xml")
 				.addAsLibraries(libs)
 				.addAsLibraries(gsonLib);
