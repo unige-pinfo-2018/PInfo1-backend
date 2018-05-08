@@ -8,6 +8,8 @@ package ch.unihub.business.service;
   on calling a rest service from domain1 to domain2 will fail
 */
 
+import org.slf4j.LoggerFactory;
+
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
@@ -19,6 +21,7 @@ public class CORSFilter implements ContainerResponseFilter {
     @Override
     public void filter(final ContainerRequestContext requestContext,
                        final ContainerResponseContext cres) throws IOException {
+        LoggerFactory.getLogger(CORSFilter.class).info("CORS filter triggered: " + requestContext.getUriInfo().getPath());
         cres.getHeaders().add("Access-Control-Allow-Origin", "http://localhost:8080");
         cres.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization");
         cres.getHeaders().add("Access-Control-Allow-Credentials", "true");
