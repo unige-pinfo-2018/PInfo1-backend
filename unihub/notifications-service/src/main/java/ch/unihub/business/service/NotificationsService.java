@@ -46,10 +46,12 @@ public class NotificationsService {
         if (usernamesWithSessionIds.containsKey(username) &&
                 usernamesWithSessionIds.get(username).equals(websocketSessionId)) {
             // Get session and WebSocket connection
+            logger.info("websocket connection successfully opened");
             this.session = session;
             sessions.add(session);
             users.put(session.getId(), username);
         } else {
+            logger.info("Websocket connection refused with username=\"" + username + "\" and session id=\"" + websocketSessionId + "\"");
             logger.info(usernamesWithSessionIds.toString());
             session.getBasicRemote().sendText(UNAUTHORIZED);
             session.close();

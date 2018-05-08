@@ -4,10 +4,6 @@
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
 http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
 	<display-name>UniHub-Notifications-Service-RS</display-name>
-	<login-config>
-		<auth-method>BASIC</auth-method>
-		<realm-name>unihub-realm</realm-name>
-	</login-config>
 
 	<servlet>
 		<servlet-name>javax.ws.rs.core.Application</servlet-name>
@@ -16,6 +12,11 @@ http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
 		<servlet-name>javax.ws.rs.core.Application</servlet-name>
 		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
+
+	<login-config>
+		<!--  <auth-method>BASIC</auth-method>-->
+		<realm-name>unihub-realm</realm-name>
+	</login-config>
 
 	<security-constraint>
 		<web-resource-collection>
