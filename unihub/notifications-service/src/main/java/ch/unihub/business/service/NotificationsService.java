@@ -133,6 +133,7 @@ public class NotificationsService {
 
         Root<Notification> root = getNotifications.from(Notification.class);
         getNotifications.where(cb.equal(root.get("username"), username));
+        getNotifications.orderBy(cb.desc(root.get("dateCreated")));
         return entityManager.createQuery(getNotifications);
     }
 
