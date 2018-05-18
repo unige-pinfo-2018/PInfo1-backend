@@ -5,6 +5,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Date;
 
 
@@ -12,7 +13,7 @@ import java.util.Date;
 @Table(name = "POSTS")
 public class Post implements Serializable {
 
-	private static final long serialVersionUID = -6146935825517747043L;
+	private static final long serialVersionUID = -6146935825517747045L;
 	
 	/** The unique id in a technical sense. */
 	@Id
@@ -47,25 +48,30 @@ public class Post implements Serializable {
 
 	public Post() {
 	}
+	
 	public Post(Long userId, String content) {
 		this.setUserId(userId);
 		this.setContent(content);
 	}
+	
 	public Post(Long userId, Long parentId, String content) {
 		this.setUserId(userId);
 		this.setParentId(parentId);
 		this.setContent(content);
 	}
 
-	// Constructor used fto test date
+	// Constructor used to test date
 	public Post(Long userId, String content, Date datePost) {
 		this.setUserId(userId);
 		this.setContent(content);
-		this.setDatePost(datePost);
+		
+		long time = datePost.getTime();
+		Timestamp ts = new Timestamp(time);
+		this.setDatePost(ts);
 	}
 	
 	// Constructor used to test comments
-	public Post(Long userId, Long replyToId, String content) {
+	public Post(Long userId, String content, Long replyToId) {
 		this.setUserId(userId);
 		this.setReplyToId(replyToId);
 		this.setContent(content);

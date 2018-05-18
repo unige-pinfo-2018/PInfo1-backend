@@ -34,6 +34,10 @@ public class Dislike implements Serializable {
     @Column(name = "POSTID")
     private Long postId;
     
+    public Dislike() {
+    	
+    }
+    
     public Dislike(long userId, long postId) {
     	this.setUserId(userId);
     	this.setPostId(postId);

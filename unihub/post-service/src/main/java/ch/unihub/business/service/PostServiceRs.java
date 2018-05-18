@@ -1,4 +1,5 @@
 package ch.unihub.business.service;
+
 import ch.unihub.dom.Post;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

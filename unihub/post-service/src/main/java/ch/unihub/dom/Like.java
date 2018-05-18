@@ -33,7 +33,11 @@ public class Like implements Serializable  {
     @Column(name = "POSTID")
     private Long postId;
     
-    public Like(long userId,lon postId) {
+    public Like() {
+    	
+    }
+    
+    public Like(long userId,long postId) {
     	this.setUserId(userId);
     	this.setPostId(postId);
     }
