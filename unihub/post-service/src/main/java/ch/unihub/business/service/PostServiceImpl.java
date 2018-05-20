@@ -358,43 +358,57 @@ public class PostServiceImpl implements PostService {
     @Override
     public List searchPost(String QuestionUser, int nbPost,List<String> listTags) {
 
-        String listTagsSql= "INNER JOIN TAGS ON TAGS.NAME IN (";
-	    for (int i=0;i<listTags.size();i++)
+        List result;
+
+        //make sure data dont have bad characteres
+        for (int i=0;i<listTags.size();i++)
         {
-            listTagsSql=listTagsSql.concat("'");
-            listTagsSql=listTagsSql.concat(listTags.get(i));
-            listTagsSql=listTagsSql.concat("',");
+            String newTag= listTags.get(i);
+            if (newTag.contains("'") || newTag.contains("\"") || newTag.contains("<") || newTag.contains(">"))
+            {
+                return new ArrayList();
+            }
         }
-        listTagsSql=listTagsSql.substring(0, listTagsSql.length() - 1);
-        listTagsSql=listTagsSql.concat(") AND TAGS.POSTID = POSTS.ID ");
+        if (QuestionUser != null) {
+            if (QuestionUser.contains("'") || QuestionUser.contains("\"") || QuestionUser.contains("<") || QuestionUser.contains(">")) {
+                return new ArrayList();
+            }
+        }
+
+	    // if no tag
         if (listTags.size() == 0)
         {
-            listTagsSql="";
+            //if no question
+            if (QuestionUser == null)
+            {
+                Query q = entityManager.createNativeQuery("SELECT DISTINCT POSTS.ID FROM POSTS WHERE PARENTID IS NULL AND REPLYTOID IS NULL ORDER BY POSTS.ID DESC LIMIT :paraNbPost");
+                result = q.setParameter("paraNbPost", nbPost).getResultList();
+            }
+            else
+            {
+                Query q = entityManager.createNativeQuery("SELECT DISTINCT POSTS.ID, MATCH(CONTENT) AGAINST (:paraQuestionUser IN NATURAL LANGUAGE MODE) AS score FROM POSTS WHERE PARENTID IS NULL AND REPLYTOID IS NULL AND MATCH(CONTENT) AGAINST (:paraQuestionUser IN NATURAL LANGUAGE MODE) > 0 ORDER BY score DESC LIMIT :paraNbPost");
+                q.setParameter("paraQuestionUser", QuestionUser);
+                result = q.setParameter("paraNbPost", nbPost).getResultList();
+            }
         }
-
-        String MatchQuestionSql;
-        String MatchQuestionSql2;
-        if (QuestionUser == null)
+        else // if tag
         {
-            MatchQuestionSql =" FROM POSTS ";
-            MatchQuestionSql2 ="ORDER BY POSTS.ID DESC LIMIT "+nbPost+";";
+            // if no question
+            if (QuestionUser == null) {
+                Query q = entityManager.createNativeQuery("SELECT DISTINCT POSTS.ID FROM POSTS INNER JOIN TAGS ON TAGS.NAME IN (:paraListTagsSql) AND TAGS.POSTID = POSTS.ID WHERE PARENTID IS NULL AND REPLYTOID IS NULL ORDER BY POSTS.ID DESC LIMIT :paraNbPost");
+                q.setParameter("paraListTagsSql", listTags);
+                result = q.setParameter("paraNbPost", nbPost).getResultList();
+            }
+            else
+            {
+                Query q = entityManager.createNativeQuery("SELECT DISTINCT POSTS.ID, MATCH(CONTENT) AGAINST (:paraQuestionUser IN NATURAL LANGUAGE MODE) AS score FROM POSTS INNER JOIN TAGS ON TAGS.NAME IN (:paraListTagsSql) AND TAGS.POSTID = POSTS.ID WHERE PARENTID IS NULL AND REPLYTOID IS NULL AND MATCH(CONTENT) AGAINST (:paraQuestionUser IN NATURAL LANGUAGE MODE) > 0 ORDER BY score DESC LIMIT :paraNbPost");
+                q.setParameter("paraQuestionUser", QuestionUser);
+                q.setParameter("paraListTagsSql", listTags);
+                result = q.setParameter("paraNbPost", nbPost).getResultList();
+            }
         }
-        else {
-            MatchQuestionSql= ", MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) AS score FROM POSTS ";
-            MatchQuestionSql2 = "AND MATCH(CONTENT) AGAINST ('"+QuestionUser+"' IN NATURAL LANGUAGE MODE) > 0 ORDER BY score DESC LIMIT "+nbPost+";";
 
 
-        }
-
-        Query q = entityManager.createNativeQuery(
-                "SELECT DISTINCT POSTS.ID" +
-                   MatchQuestionSql+
-                   listTagsSql+
-                   "WHERE PARENTID IS NULL AND REPLYTOID IS NULL "+
-                   MatchQuestionSql2);
-
-
-		List result = q.getResultList();
 
         //delete in the list "score" of "match against"
 		if (QuestionUser != null)
