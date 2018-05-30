@@ -198,7 +198,7 @@ public class PostServiceRs {
     @Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	public Response addPost(@NotNull Post post) throws URISyntaxException {
-		if (post.getUserId() == null || post.getContent() == null || post.getContent().length() > 400)
+		if (post.getUserId() == null || post.getContent() == null || post.getContent().length() > 50000)
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		else
 			return Response.status(Response.Status.CREATED).entity(service.addPost(post)).build();

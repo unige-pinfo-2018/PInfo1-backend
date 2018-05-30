@@ -35,7 +35,7 @@ public class Post implements Serializable {
 
 	/** The user content */
 	@NotNull
-	@Size(min = 2, max = 800)
+	@Size(min = 2, max = 50000)
 	@Column(name = "CONTENT")
 	private String content;
 
